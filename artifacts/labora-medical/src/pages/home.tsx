@@ -39,6 +39,12 @@ const offerImages = Array.from(
   (_, index) => `/assets/kholoud-offer-${String(index + 1).padStart(2, "0")}.jpg`,
 )
 
+const nationalDayOfferImages = Array.from(
+  { length: 8 },
+  (_, index) =>
+    `/assets/national-day-96/national-day-96-${String(index + 1).padStart(2, "0")}.png`,
+)
+
 export default function Home() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeHeroSlide, setActiveHeroSlide] = useState(0)
@@ -376,6 +382,59 @@ export default function Home() {
             <Button variant="outline" className="w-full mt-8 md:hidden rounded-full">
               عرض كافة الباقات
             </Button>
+          </div>
+        </section>
+
+        {/* NATIONAL DAY OFFERS */}
+        <section id="national-day-offers" className="relative overflow-hidden bg-[#f4f2e8] py-24">
+          <div className="absolute -right-40 top-16 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+          <div className="container relative z-10 mx-auto px-4 md:px-6">
+            <div className="mx-auto mb-14 max-w-2xl text-center reveal-on-scroll">
+              <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">
+                اليوم الوطني السعودي 96
+              </span>
+              <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
+                عروض اليوم الوطني
+              </h2>
+              <p className="text-muted-foreground">
+                اكتشفي باقات مختبر خلود الخاصة باليوم الوطني، واضغطي على أي صورة لعرض تفاصيل العرض بالحجم الكامل.
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
+              {nationalDayOfferImages.map((image, index) => (
+                <Card
+                  key={image}
+                  className="group overflow-hidden border-primary/10 bg-white p-2 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 reveal-on-scroll"
+                  style={{ transitionDelay: `${(index % 4) * 0.08}s` }}
+                >
+                  <a
+                    href={image}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`عرض اليوم الوطني رقم ${index + 1} بالحجم الكامل`}
+                    className="block overflow-hidden rounded-xl bg-secondary/20"
+                  >
+                    <img
+                      src={image}
+                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${index + 1}`}
+                      loading={index < 2 ? "eager" : "lazy"}
+                      className="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  </a>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-12 flex justify-center reveal-on-scroll">
+              <a
+                href={homeAnchor("portal")}
+                className="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary/90"
+              >
+                احجزي موعدك الآن
+                <ChevronLeft className="mr-2 h-4 w-4" />
+              </a>
+            </div>
           </div>
         </section>
 
