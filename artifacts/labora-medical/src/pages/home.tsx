@@ -205,7 +205,7 @@ export default function Home() {
               <div className="max-w-2xl">
                 <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">عروض الفحوصات</h2>
                 <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">باقات مصممة لاحتياجاتك</h3>
-                <p className="text-muted-foreground">اختر الباقة الأنسب لك ولعائلتك للاطمئنان على صحتك بتكلفة مدروسة وشاملة.</p>
+              <p className="text-muted-foreground">استعرض أحدث عروض مختبر خلود واختر الفحص الأنسب لك ولعائلتك براحة ووضوح.</p>
               </div>
               <Button variant="outline" className="hidden md:flex mt-6 md:mt-0 rounded-full">
                 عرض كافة الباقات
@@ -213,39 +213,42 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {[
-                { name: "الباقة الشاملة", price: "599", features: ["صورة الدم الكاملة (CBC)", "وظائف الكبد والكلى", "مستوى السكر التراكمي", "فحص الكوليسترول والدهون", "فيتامين د وب12"], popular: false },
-                { name: "باقة صحة المرأة", price: "750", features: ["كافة الفحوصات الشاملة", "الهرمونات الأنثوية", "فحص الغدة الدرقية", "مخزون الحديد", "فحص هشاشة العظام المبدئي"], popular: true },
-                { name: "باقة صحة الرجل", price: "699", features: ["كافة الفحوصات الشاملة", "هرمون التستوستيرون", "فحص البروستاتا (PSA)", "فحص النقرس", "إنزيمات القلب"], popular: false },
-              ].map((pkg, i) => (
-                <Card key={i} className={`relative overflow-hidden reveal-on-scroll ${pkg.popular ? 'border-primary shadow-xl shadow-primary/10' : 'border-border'}`} style={{ transitionDelay: `${i * 0.1}s` }}>
-                  {pkg.popular && (
-                    <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg">
-                      الأكثر طلباً
+                {
+                  image: "/assets/kholoud-packages-1.png",
+                  alt: "عروض باقة الفحص الشامل بلس والباقة الفضية وباقة الفحص الشامل من مختبر خلود",
+                  label: "عروض الفحص الشامل",
+                },
+                {
+                  image: "/assets/kholoud-packages-2.png",
+                  alt: "عروض باقة تساقط الشعر والغدة الدرقية والمعادن والفيتامينات من مختبر خلود",
+                  label: "عروض الفحوصات التخصصية",
+                },
+              ].map((offer, i) => (
+                <Card
+                  key={offer.image}
+                  className="overflow-hidden border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 reveal-on-scroll"
+                  style={{ transitionDelay: `${i * 0.12}s` }}
+                >
+                  <img
+                    src={offer.image}
+                    alt={offer.alt}
+                    className="block h-auto w-full object-cover"
+                  />
+                  <CardContent className="flex items-center justify-between gap-4 p-5">
+                    <div>
+                      <p className="font-bold text-foreground">{offer.label}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">العروض والأسعار موضحة في الصورة</p>
                     </div>
-                  )}
-                  <CardContent className="p-8">
-                    <h4 className="text-2xl font-bold text-foreground mb-2">{pkg.name}</h4>
-                    <div className="flex items-baseline gap-1 mb-6">
-                      <span className="text-4xl font-bold text-primary font-en">{pkg.price}</span>
-                      <span className="text-sm text-muted-foreground">ريال</span>
-                    </div>
-                    <ul className="space-y-4 mb-8">
-                      {pkg.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <div className="mt-1 h-4 w-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <div className="h-2 w-2 rounded-full bg-primary" />
-                          </div>
-                          <span className="text-sm text-foreground/80">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button variant={pkg.popular ? "default" : "outline"} className="w-full rounded-xl" onClick={() => {
-                      document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
-                      setActiveTab('book')
-                    }}>
-                      اختر الباقة
+                    <Button
+                      className="shrink-0 rounded-full"
+                      onClick={() => {
+                        document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
+                        setActiveTab('book')
+                      }}
+                    >
+                      احجز الآن
                     </Button>
                   </CardContent>
                 </Card>
@@ -358,7 +361,7 @@ export default function Home() {
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 w-full sm:w-auto rounded-full gap-2">
                 <PhoneCall className="h-5 w-5" />
-                <span className="font-en" dir="ltr">+966 50 123 4567</span>
+                <span className="font-en" dir="ltr">055 907 0400</span>
               </Button>
             </div>
           </div>

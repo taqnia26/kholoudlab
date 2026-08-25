@@ -59,8 +59,8 @@ export function Navbar() {
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <a href="tel:+966123456789" className="flex items-center gap-2 text-primary font-medium hover:opacity-80 transition-opacity">
-              <span className="font-en text-sm mt-1" dir="ltr">+966 50 123 4567</span>
+            <a href="tel:+966559070400" className="flex items-center gap-2 text-primary font-medium hover:opacity-80 transition-opacity">
+              <span className="font-en text-sm mt-1" dir="ltr">055 907 0400</span>
               <Phone className="h-4 w-4" />
             </a>
             <Button asChild className="rounded-full px-6">
@@ -98,9 +98,9 @@ export function Navbar() {
           ))}
         </nav>
         <div className="mt-auto pb-12 flex flex-col gap-4">
-          <a href="tel:+966123456789" className="flex items-center justify-center gap-2 text-primary font-medium p-4 bg-primary/5 rounded-xl">
+          <a href="tel:+966559070400" className="flex items-center justify-center gap-2 text-primary font-medium p-4 bg-primary/5 rounded-xl">
             <Phone className="h-5 w-5" />
-            <span className="font-en text-lg" dir="ltr">+966 50 123 4567</span>
+            <span className="font-en text-lg" dir="ltr">055 907 0400</span>
           </a>
           <Button size="lg" className="w-full rounded-xl" asChild onClick={() => setMobileMenuOpen(false)}>
             <a href="#book">احجز موعدك الآن</a>
