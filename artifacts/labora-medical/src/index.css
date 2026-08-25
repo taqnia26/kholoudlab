@@ -169,6 +169,48 @@
   transform: translateY(0);
 }
 
+@keyframes national-day-slide-from-left {
+  from {
+    opacity: 0.7;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes national-day-slide-from-right {
+  from {
+    opacity: 0.7;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.national-day-slide {
+  animation-duration: 550ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.national-day-slide-from-left {
+  animation-name: national-day-slide-from-left;
+}
+
+.national-day-slide-from-right {
+  animation-name: national-day-slide-from-right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .national-day-slide {
+    animation-duration: 1ms;
+  }
+}
+
 /* Emphasize English text neatly within Arabic layout */
 .font-en {
   font-family: 'Outfit', sans-serif;

@@ -48,7 +48,8 @@ const nationalDayOfferImages = Array.from(
 export default function Home() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeHeroSlide, setActiveHeroSlide] = useState(0)
-  const [showAllOffers, setShowAllOffers] = useState(false)
+  const [activeNationalDayOffer, setActiveNationalDayOffer] = useState(0)
+  const [nationalDaySlideDirection, setNationalDaySlideDirection] = useState(1)
   const [scrollPosition, setScrollPosition] = useState(0)
 
   useEffect(() => {
@@ -77,6 +78,15 @@ export default function Home() {
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setNationalDaySlideDirection(1)
+      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
+    }, 5000)
+
+    return () => window.clearTimeout(timer)
+  }, [activeNationalDayOffer])
 
   useEffect(() => {
     let delayedScroll: number | undefined
@@ -124,7 +134,7 @@ export default function Home() {
     }, 1500)
   }
 
-  const visibleOffers = showAllOffers ? offerImages : offerImages.slice(0, 8)
+  const visibleOffers = offerImages.slice(0, 8)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -401,29 +411,75 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
-              {nationalDayOfferImages.map((image, index) => (
-                <Card
-                  key={image}
-                  className="group overflow-hidden border-primary/10 bg-white p-2 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 reveal-on-scroll"
-                  style={{ transitionDelay: `${(index % 4) * 0.08}s` }}
-                >
+            <div className="mx-auto max-w-xl reveal-on-scroll">
+              <Card className="overflow-hidden border-primary/10 bg-white p-2 shadow-xl shadow-primary/10">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-secondary/20">
                   <a
-                    href={image}
+                    key={nationalDayOfferImages[activeNationalDayOffer]}
+                    href={nationalDayOfferImages[activeNationalDayOffer]}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`عرض اليوم الوطني رقم ${index + 1} بالحجم الكامل`}
-                    className="block overflow-hidden rounded-xl bg-secondary/20"
+                    aria-label={`عرض اليوم الوطني رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
+                    className={`national-day-slide absolute inset-0 block ${
+                      nationalDaySlideDirection > 0
+                        ? "national-day-slide-from-left"
+                        : "national-day-slide-from-right"
+                    }`}
                   >
                     <img
-                      src={image}
-                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${index + 1}`}
-                      loading={index < 2 ? "eager" : "lazy"}
-                      className="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                      src={nationalDayOfferImages[activeNationalDayOffer]}
+                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
+                      className="block h-full w-full object-contain"
                     />
                   </a>
-                </Card>
-              ))}
+
+                  <button
+                    type="button"
+                    aria-label="العرض التالي"
+                    onClick={() => {
+                      setNationalDaySlideDirection(1)
+                      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
+                    }}
+                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg backdrop-blur-sm transition-colors hover:bg-white"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="العرض السابق"
+                    onClick={() => {
+                      setNationalDaySlideDirection(-1)
+                      setActiveNationalDayOffer((current) => (current - 1 + nationalDayOfferImages.length) % nationalDayOfferImages.length)
+                    }}
+                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg backdrop-blur-sm transition-colors hover:bg-white"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                </div>
+              </Card>
+
+              <div className="mt-5 flex items-center justify-center gap-2" aria-label="مؤشر عروض اليوم الوطني">
+                {nationalDayOfferImages.map((image, index) => (
+                  <button
+                    key={image}
+                    type="button"
+                    aria-label={`عرض اليوم الوطني رقم ${index + 1}`}
+                    aria-current={activeNationalDayOffer === index ? "true" : undefined}
+                    onClick={() => {
+                      setNationalDaySlideDirection(index > activeNationalDayOffer ? 1 : -1)
+                      setActiveNationalDayOffer(index)
+                    }}
+                    className={`h-2.5 rounded-full transition-all ${
+                      activeNationalDayOffer === index
+                        ? "w-8 bg-primary"
+                        : "w-2.5 bg-primary/25 hover:bg-primary/50"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
+                العرض {activeNationalDayOffer + 1} من {nationalDayOfferImages.length}
+              </p>
             </div>
 
             <div className="mt-12 flex justify-center reveal-on-scroll">
@@ -450,7 +506,7 @@ export default function Home() {
                 </p>
               </div>
               <span className="shrink-0 rounded-full bg-primary/5 px-4 py-2 text-sm font-bold text-primary">
-                {offerImages.length} عرضًا متاحًا
+                {visibleOffers.length} عروض مختارة
               </span>
             </div>
 
@@ -482,16 +538,6 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="mt-10 flex justify-center">
-              <Button
-                variant="outline"
-                className="rounded-full px-8"
-                onClick={() => setShowAllOffers((current) => !current)}
-              >
-                {showAllOffers ? "إظهار عروض أقل" : "عرض جميع العروض"}
-                <ChevronLeft className="mr-2 h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </section>
 

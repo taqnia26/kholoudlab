@@ -1,1 +1,2 @@
 - [OpenAPI Zod v3 generation](openapi-zod-v3.md) — generated integer schemas need a compatibility pass because the pinned Zod v3 lacks `z.int()`.
+- [Homepage slider animation](homepage-slider-animation.md) — use CSS animation for the home carousel to avoid Vite HMR hook instability.

@@ -8,6 +8,7 @@ import Home from '@/pages/home';
 import About from '@/pages/about';
 import Results from '@/pages/results';
 import StaffResults from '@/pages/staff-results';
+import { WhatsAppFloat } from '@/components/layout/whatsapp-float';
 import {
   Route,
   Switch,
@@ -43,6 +44,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <Router />
         </WouterRouter>
+        <WhatsAppFloat />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
