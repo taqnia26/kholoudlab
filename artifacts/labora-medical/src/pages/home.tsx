@@ -98,7 +98,7 @@ export default function Home() {
               <div className="w-full lg:w-1/2 text-center lg:text-right reveal-on-scroll">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6 border border-primary/20">
                   <ShieldCheck className="h-4 w-4" />
-                  <span>معتمدون من وزارة الصحة</span>
+                  <span>مختبر معتمد من سباهي (CBAHI)</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.2] mb-6">
                   دقتنا لراحتكم.<br />
@@ -457,6 +457,21 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
+                </div>
+
+                <div id="accreditation" className="mt-10 flex items-center gap-4 rounded-2xl border border-primary/15 bg-primary/5 p-5">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
+                    <ShieldCheck className="h-7 w-7" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-lg font-bold text-foreground">اعتماد سباهي (CBAHI)</h4>
+                      <span className="rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-white">معتمد</span>
+                    </div>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      نفخر باعتماد مختبر خلود من المركز السعودي لاعتماد المنشآت الصحية، التزامًا بأعلى معايير الجودة وسلامة المرضى.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
