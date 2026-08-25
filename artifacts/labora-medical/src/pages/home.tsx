@@ -7,7 +7,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
-  Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight,
+  Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
   PhoneCall, CalendarCheck, Search
 } from "lucide-react"
 
@@ -42,6 +42,7 @@ export default function Home() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeHeroSlide, setActiveHeroSlide] = useState(0)
   const [showAllOffers, setShowAllOffers] = useState(false)
+  const [scrollPosition, setScrollPosition] = useState(0)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -70,6 +71,14 @@ export default function Home() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    const handleScroll = () => setScrollPosition(window.scrollY)
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setFormState('loading')
@@ -84,6 +93,26 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+
+      <div className="fixed bottom-5 right-4 z-40 flex flex-col gap-2 rounded-full border border-primary/15 bg-white/90 p-1.5 shadow-lg shadow-primary/10 backdrop-blur-md">
+        <button
+          type="button"
+          aria-label="الصعود إلى أعلى الصفحة"
+          disabled={scrollPosition <= 80}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          aria-label="النزول إلى أسفل الصفحة"
+          onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" })}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary/90"
+        >
+          <ChevronDown className="h-5 w-5" />
+        </button>
+      </div>
 
       <main className="flex-grow">
         {/* HERO SECTION */}
@@ -460,8 +489,12 @@ export default function Home() {
                 </div>
 
                 <div id="accreditation" className="mt-10 flex items-center gap-4 rounded-2xl border border-primary/15 bg-primary/5 p-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
-                    <ShieldCheck className="h-7 w-7" />
+                  <div className="flex h-16 w-32 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-sm">
+                    <img
+                      src="/assets/cbahi-logo.jpg"
+                      alt="شعار سباهي CBAHI"
+                      className="h-full w-full object-contain"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
