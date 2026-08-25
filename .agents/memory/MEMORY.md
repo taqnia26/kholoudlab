@@ -1,0 +1,1 @@
+- [OpenAPI Zod v3 generation](openapi-zod-v3.md) — generated integer schemas need a compatibility pass because the pinned Zod v3 lacks `z.int()`.

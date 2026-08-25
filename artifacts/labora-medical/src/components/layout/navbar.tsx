@@ -76,6 +76,9 @@ export function Navbar() {
             <Button asChild className="rounded-full px-6">
               <a href={homeAnchor("book")}>احجز موعدك</a>
             </Button>
+            <Link href="/staff/results" className="text-xs font-bold text-muted-foreground transition-colors hover:text-primary">
+              بوابة الموظفين
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
@@ -126,6 +129,13 @@ export function Navbar() {
           <Button size="lg" className="w-full rounded-xl" asChild onClick={() => setMobileMenuOpen(false)}>
             <a href={homeAnchor("book")}>احجز موعدك الآن</a>
           </Button>
+          <Link
+            href="/staff/results"
+            className="text-center text-sm font-bold text-muted-foreground transition-colors hover:text-primary"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            بوابة الموظفين
+          </Link>
         </div>
       </div>
     </header>
