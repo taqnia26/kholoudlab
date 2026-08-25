@@ -7,13 +7,41 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
-  Syringe, ShieldCheck, Clock, ArrowLeft,
-  ChevronLeft, PhoneCall, CalendarCheck, Search
+  Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight,
+  PhoneCall, CalendarCheck, Search
 } from "lucide-react"
+
+const heroSlides = [
+  {
+    image: "/assets/kholoud-lab-hero.jpg",
+    alt: "أخصائية مختبر تعمل على تحليل العينات داخل مختبر حديث",
+    eyebrow: "دقة تبدأ من العينة",
+    title: "نتائج موثوقة لصحة أكثر اطمئنانًا",
+  },
+  {
+    image: "/assets/kholoud-offer-01.jpg",
+    alt: "عرض الفحص الشامل من مختبر خلود",
+    eyebrow: "عروض مختبر خلود",
+    title: "اختاري الفحص الأنسب لكِ ولعائلتك",
+  },
+  {
+    image: "/assets/kholoud-offer-10.jpg",
+    alt: "عرض باقة هرمونات المرأة من مختبر خلود",
+    eyebrow: "فحوصات متخصصة",
+    title: "رعاية مخبرية تفهم احتياجاتك",
+  },
+]
+
+const offerImages = Array.from(
+  { length: 45 },
+  (_, index) => `/assets/kholoud-offer-${String(index + 1).padStart(2, "0")}.jpg`,
+)
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'book' | 'results'>('book')
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0)
+  const [showAllOffers, setShowAllOffers] = useState(false)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -34,6 +62,14 @@ export default function Home() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveHeroSlide((current) => (current + 1) % heroSlides.length)
+    }, 6500)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setFormState('loading')
@@ -43,18 +79,20 @@ export default function Home() {
     }, 1500)
   }
 
+  const visibleOffers = showAllOffers ? offerImages : offerImages.slice(0, 8)
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
       <main className="flex-grow">
         {/* HERO SECTION */}
-        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <section className="relative pt-28 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
           <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_50%)]" />
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] z-0 mix-blend-multiply" />
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
               
               {/* Hero Content */}
               <div className="w-full lg:w-1/2 text-center lg:text-right reveal-on-scroll">
@@ -88,9 +126,63 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Interactive Portal Panel (Hero visual anchor) */}
-              <div id="portal" className="w-full lg:w-1/2 max-w-md mx-auto lg:mx-0 reveal-on-scroll" style={{ transitionDelay: '0.2s' }}>
-                <Card className="shadow-2xl shadow-primary/5 border-primary/10 overflow-hidden relative">
+              {/* Hero Slider + Interactive Portal */}
+              <div id="portal" className="w-full lg:w-1/2 max-w-xl mx-auto lg:mx-0 reveal-on-scroll" style={{ transitionDelay: '0.2s' }}>
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-primary/10 shadow-2xl shadow-primary/15">
+                  {heroSlides.map((slide, index) => (
+                    <div
+                      key={slide.image}
+                      className={`absolute inset-0 transition-opacity duration-700 ${activeHeroSlide === index ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                      aria-hidden={activeHeroSlide !== index}
+                    >
+                      <img
+                        src={slide.image}
+                        alt={slide.alt}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-8">
+                        <p className="mb-2 text-sm font-bold text-white/80">{slide.eyebrow}</p>
+                        <p className="max-w-sm text-xl font-bold leading-tight md:text-2xl">{slide.title}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm" aria-label="التنقل بين صور السلايدر">
+                      {heroSlides.map((slide, index) => (
+                        <button
+                          key={`${slide.image}-dot`}
+                          type="button"
+                          aria-label={`عرض الصورة ${index + 1}`}
+                          aria-current={activeHeroSlide === index}
+                          onClick={() => setActiveHeroSlide(index)}
+                          className={`h-2 rounded-full transition-all ${activeHeroSlide === index ? "w-7 bg-white" : "w-2 bg-white/60 hover:bg-white"}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-primary shadow-sm">مختبر خلود</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    aria-label="الصورة السابقة"
+                    onClick={() => setActiveHeroSlide((activeHeroSlide - 1 + heroSlides.length) % heroSlides.length)}
+                    className="absolute left-4 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition-transform hover:scale-105 md:left-5"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="الصورة التالية"
+                    onClick={() => setActiveHeroSlide((activeHeroSlide + 1) % heroSlides.length)}
+                    className="absolute right-4 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition-transform hover:scale-105 md:right-5"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <Card id="book" className="relative z-10 mt-6 overflow-hidden border-primary/10 shadow-2xl shadow-primary/10">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
                   <div className="flex bg-muted/30 border-b border-border/50">
                     <button 
@@ -100,6 +192,7 @@ export default function Home() {
                       حجز موعد
                     </button>
                     <button 
+                      id="results"
                       onClick={() => setActiveTab('results')}
                       className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'results' ? 'text-primary bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}
                     >
@@ -236,13 +329,13 @@ export default function Home() {
                     alt={offer.alt}
                     className="block h-auto w-full object-cover"
                   />
-                  <CardContent className="flex items-center justify-between gap-4 p-5">
+                  <CardContent className="flex flex-col items-stretch gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-bold text-foreground">{offer.label}</p>
                       <p className="mt-1 text-sm text-muted-foreground">العروض والأسعار موضحة في الصورة</p>
                     </div>
                     <Button
-                      className="shrink-0 rounded-full"
+                      className="w-full shrink-0 rounded-full sm:w-auto"
                       onClick={() => {
                         document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
                         setActiveTab('book')
@@ -257,6 +350,66 @@ export default function Home() {
             <Button variant="outline" className="w-full mt-8 md:hidden rounded-full">
               عرض كافة الباقات
             </Button>
+          </div>
+        </section>
+
+        {/* OFFER GALLERY */}
+        <section id="gallery" className="py-24 bg-white">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col items-start justify-between gap-6 mb-12 md:flex-row md:items-end reveal-on-scroll">
+              <div className="max-w-2xl">
+                <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">من عروضنا</h2>
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">اختاري باقتك بكل وضوح</h3>
+                <p className="text-muted-foreground">
+                  مجموعة من عروض مختبر خلود المصممة لتناسب احتياجاتك الصحية المختلفة، مع تفاصيل الفحوصات والأسعار داخل كل تصميم.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-primary/5 px-4 py-2 text-sm font-bold text-primary">
+                {offerImages.length} عرضًا متاحًا
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+              {visibleOffers.map((image, index) => (
+                <Card
+                  key={image}
+                  className="group overflow-hidden border-border/70 bg-background shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 reveal-on-scroll"
+                  style={{ transitionDelay: `${(index % 8) * 0.05}s` }}
+                >
+                  <div className="relative aspect-[9/16] overflow-hidden bg-secondary/30">
+                    <img
+                      src={image}
+                      alt={`عرض مختبر خلود رقم ${index + 1}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 transition-transform duration-300 group-hover:translate-y-0">
+                      <Button
+                        size="sm"
+                        className="w-full rounded-full bg-white text-primary hover:bg-white/90"
+                        onClick={() => {
+                          document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
+                          setActiveTab('book')
+                        }}
+                      >
+                        احجز هذه الباقة
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-10 flex justify-center">
+              <Button
+                variant="outline"
+                className="rounded-full px-8"
+                onClick={() => setShowAllOffers((current) => !current)}
+              >
+                {showAllOffers ? "إظهار عروض أقل" : "عرض جميع العروض"}
+                <ChevronLeft className="mr-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </section>
 
