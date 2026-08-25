@@ -140,7 +140,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <div className="fixed bottom-5 right-4 z-40 flex flex-col gap-2 rounded-full border border-primary/15 bg-white/90 p-1.5 shadow-lg shadow-primary/10 backdrop-blur-md">
+      <div className="fixed bottom-5 right-4 z-40 hidden flex-col gap-2 rounded-full border border-primary/15 bg-white/90 p-1.5 shadow-lg shadow-primary/10 backdrop-blur-md lg:flex">
         <button
           type="button"
           aria-label="الصعود إلى أعلى الصفحة"

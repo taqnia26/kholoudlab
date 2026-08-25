@@ -11,9 +11,9 @@ export function WhatsAppFloat() {
       rel="noopener noreferrer"
       aria-label="تواصل مع مختبر خلود عبر واتساب"
       title="تواصل معنا عبر واتساب"
-      className="fixed bottom-5 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-[#25D366]/30 transition-transform duration-300 hover:scale-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/30 sm:bottom-6 sm:left-6"
+      className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-[#25D366]/30 transition-transform duration-300 hover:scale-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/30 md:bottom-6 md:left-6 md:z-40 md:h-14 md:w-14"
     >
-      <FaWhatsapp className="h-8 w-8" aria-hidden="true" />
+      <FaWhatsapp className="h-7 w-7 md:h-8 md:w-8" aria-hidden="true" />
       <span className="sr-only">تواصل مع مختبر خلود عبر واتساب</span>
     </a>
   )

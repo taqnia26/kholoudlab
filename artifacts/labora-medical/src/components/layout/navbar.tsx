@@ -45,7 +45,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) =>
               link.anchor ? (
                 <a
@@ -68,7 +68,7 @@ export function Navbar() {
           </nav>
 
           {/* Actions */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <a href="tel:+966559070400" className="flex items-center gap-2 text-primary font-medium hover:opacity-80 transition-opacity">
               <span className="font-en text-sm mt-1" dir="ltr">055 907 0400</span>
               <Phone className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function Navbar() {
 
           {/* Mobile Toggle */}
           <button
-            className="md:hidden z-50 p-2 text-foreground"
+            className="lg:hidden z-50 p-2 text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -94,7 +94,7 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          "fixed inset-0 bg-background/95 backdrop-blur-xl z-40 transition-transform duration-300 md:hidden pt-24 px-6 flex flex-col",
+          "fixed inset-0 bg-background/95 backdrop-blur-xl z-40 transition-transform duration-300 lg:hidden pt-24 px-6 flex flex-col",
           mobileMenuOpen ? "translate-y-0" : "-translate-y-full"
         )}
       >
