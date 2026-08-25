@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "KHOLOUD LAB | مختبر خلود"
+description = "واجهة عربية فاخرة لمختبر خلود للتحاليل الطبية، تسهّل الحجز، استلام النتائج، واكتشاف الفحوصات بثقة."
+version = "1.0.0"
+id = "artifacts/labora-medical"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23824
+
+[services.development]
+run = "pnpm --filter @workspace/labora-medical run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/labora-medical", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/labora-medical/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23824"
+BASE_PATH = "/"
