@@ -2,7 +2,7 @@ import { Link } from "wouter"
 import { Button } from "@/components/ui/button"
 import { Phone, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
-import { cn } from "@/lib/utils"
+import { cn, homeAnchor } from "@/lib/utils"
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -18,10 +18,10 @@ export function Navbar() {
 
   const navLinks = [
     { label: "الرئيسية", href: "/" },
-    { label: "خدماتنا", href: "#services" },
-    { label: "باقات الفحص", href: "#packages" },
-    { label: "النتائج", href: "#results" },
-    { label: "من نحن", href: "#about" },
+    { label: "خدماتنا", anchor: "services" },
+    { label: "باقات الفحص", anchor: "packages" },
+    { label: "النتائج", href: "/results" },
+    { label: "من نحن", href: "/about" },
   ]
 
   return (
@@ -46,15 +46,25 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.anchor ? (
+                <a
+                  key={link.anchor}
+                  href={homeAnchor(link.anchor)}
+                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href ?? "/"}
+                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
           </nav>
 
           {/* Actions */}
@@ -64,7 +74,7 @@ export function Navbar() {
               <Phone className="h-4 w-4" />
             </a>
             <Button asChild className="rounded-full px-6">
-              <a href="#book">احجز موعدك</a>
+              <a href={homeAnchor("book")}>احجز موعدك</a>
             </Button>
           </div>
 
@@ -86,16 +96,27 @@ export function Navbar() {
         )}
       >
         <nav className="flex flex-col gap-6 text-center mt-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-xl font-medium text-foreground hover:text-primary transition-colors pb-4 border-b border-border/20"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.anchor ? (
+              <a
+                key={link.anchor}
+                href={homeAnchor(link.anchor)}
+                className="text-xl font-medium text-foreground hover:text-primary transition-colors pb-4 border-b border-border/20"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href ?? "/"}
+                className="text-xl font-medium text-foreground hover:text-primary transition-colors pb-4 border-b border-border/20"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
         <div className="mt-auto pb-12 flex flex-col gap-4">
           <a href="tel:+966559070400" className="flex items-center justify-center gap-2 text-primary font-medium p-4 bg-primary/5 rounded-xl">
@@ -103,7 +124,7 @@ export function Navbar() {
             <span className="font-en text-lg" dir="ltr">055 907 0400</span>
           </a>
           <Button size="lg" className="w-full rounded-xl" asChild onClick={() => setMobileMenuOpen(false)}>
-            <a href="#book">احجز موعدك الآن</a>
+            <a href={homeAnchor("book")}>احجز موعدك الآن</a>
           </Button>
         </div>
       </div>

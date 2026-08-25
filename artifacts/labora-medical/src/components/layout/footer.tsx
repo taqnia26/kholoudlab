@@ -1,5 +1,6 @@
 import { Link } from "wouter"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
+import { homeAnchor } from "@/lib/utils"
 
 export function Footer() {
   return (
@@ -21,10 +22,10 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-bold mb-6 text-foreground">روابط سريعة</h4>
             <ul className="space-y-4">
-              <li><a href="#services" className="text-muted-foreground hover:text-primary transition-colors">خدماتنا الطبية</a></li>
-              <li><a href="#packages" className="text-muted-foreground hover:text-primary transition-colors">باقات الفحص الشامل</a></li>
-              <li><a href="#results" className="text-muted-foreground hover:text-primary transition-colors">استعلام عن النتائج</a></li>
-              <li><a href="#about" className="text-muted-foreground hover:text-primary transition-colors">عن المختبر</a></li>
+               <li><a href={homeAnchor("services")} className="text-muted-foreground hover:text-primary transition-colors">خدماتنا الطبية</a></li>
+               <li><a href={homeAnchor("packages")} className="text-muted-foreground hover:text-primary transition-colors">باقات الفحص الشامل</a></li>
+               <li><Link href="/results" className="text-muted-foreground hover:text-primary transition-colors">استعلام عن النتائج</Link></li>
+               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">عن المختبر</Link></li>
             </ul>
           </div>
 

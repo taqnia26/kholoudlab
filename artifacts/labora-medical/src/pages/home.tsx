@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react"
+import { Link } from "wouter"
+import { homeAnchor } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,7 +10,7 @@ import { Footer } from "@/components/layout/footer"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
   Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
-  PhoneCall, CalendarCheck, Search
+  PhoneCall, CalendarCheck
 } from "lucide-react"
 
 const heroSlides = [
@@ -38,7 +40,6 @@ const offerImages = Array.from(
 )
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'book' | 'results'>('book')
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeHeroSlide, setActiveHeroSlide] = useState(0)
   const [showAllOffers, setShowAllOffers] = useState(false)
@@ -69,6 +70,35 @@ export default function Home() {
     }, 6500)
 
     return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    let delayedScroll: number | undefined
+
+    const scrollToAnchor = () => {
+      const targetId = decodeURIComponent(window.location.hash.replace(/^#/, ""))
+      if (!targetId) return
+
+      const scroll = () => {
+        const target = document.getElementById(targetId)
+        if (!target) return
+
+        const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 96
+        const targetTop = target.getBoundingClientRect().top + window.scrollY - headerHeight - 16
+        window.scrollTo(0, Math.max(0, targetTop))
+      }
+
+      window.requestAnimationFrame(scroll)
+      delayedScroll = window.setTimeout(scroll, 100)
+    }
+
+    scrollToAnchor()
+    window.addEventListener("hashchange", scrollToAnchor)
+
+    return () => {
+      window.removeEventListener("hashchange", scrollToAnchor)
+      if (delayedScroll) window.clearTimeout(delayedScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -140,17 +170,15 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                   <Button size="lg" className="w-full sm:w-auto gap-2 rounded-full" onClick={() => {
                     document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
-                    setActiveTab('book')
                   }}>
                     <CalendarCheck className="h-5 w-5" />
                     احجز موعدك الآن
                   </Button>
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 rounded-full" onClick={() => {
-                    document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
-                    setActiveTab('results')
-                  }}>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 rounded-full" asChild>
+                    <Link href="/results">
                     <FileText className="h-5 w-5" />
                     استعلام عن النتائج
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -213,70 +241,42 @@ export default function Home() {
 
                 <Card id="book" className="relative z-10 mt-6 overflow-hidden border-primary/10 shadow-2xl shadow-primary/10">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
-                  <div className="flex bg-muted/30 border-b border-border/50">
-                    <button 
-                      onClick={() => setActiveTab('book')}
-                      className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'book' ? 'text-primary bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                      حجز موعد
-                    </button>
-                    <button 
-                      id="results"
-                      onClick={() => setActiveTab('results')}
-                      className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'results' ? 'text-primary bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                      استلام النتائج
-                    </button>
-                  </div>
                   <CardContent className="p-8">
-                    {activeTab === 'book' ? (
-                      <form onSubmit={handleFormSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">الاسم الكامل</label>
-                          <Input placeholder="أدخل اسمك الكريم" required />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">رقم الجوال</label>
-                          <Input type="tel" dir="rtl" placeholder="05x xxx xxxx" className="font-en text-right" required />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">نوع الفحص (اختياري)</label>
-                          <select className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                            <option>فحص شامل</option>
-                            <option>تحاليل دم روتينية</option>
-                            <option>فحص فيتامينات</option>
-                            <option>غير متأكد</option>
-                          </select>
-                        </div>
-                        <Button type="submit" className="w-full mt-2" disabled={formState !== 'idle'}>
-                          {formState === 'idle' && "تأكيد الطلب"}
-                          {formState === 'loading' && "جاري الإرسال..."}
-                          {formState === 'success' && "تم استلام طلبك بنجاح!"}
-                        </Button>
-                      </form>
-                    ) : (
-                      <form onSubmit={handleFormSubmit} className="space-y-5">
-                        <div className="text-center mb-6">
-                          <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-                            <Search className="h-8 w-8" />
-                          </div>
-                          <p className="text-sm text-muted-foreground">أدخل بياناتك للوصول الآمن إلى نتائج تحاليلك الطبية.</p>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">رقم الهوية / الإقامة</label>
-                          <Input type="text" className="font-en text-right" placeholder="10xxxxxxxx" required />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">رقم الفاتورة أو الملف</label>
-                          <Input type="text" className="font-en text-right" placeholder="INV-xxxxx" required />
-                        </div>
-                        <Button type="submit" className="w-full" disabled={formState !== 'idle'}>
-                          {formState === 'idle' && "عرض النتائج"}
-                          {formState === 'loading' && "جاري البحث..."}
-                          {formState === 'success' && "تم العثور على النتائج"}
-                        </Button>
-                      </form>
-                    )}
+                    <div className="mb-6">
+                      <p className="mb-2 text-sm font-bold text-primary">حجز موعد</p>
+                      <h2 className="text-2xl font-bold text-foreground">خطوتك الأولى نحو الاطمئنان</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">اترك بياناتك وسيتواصل معك فريقنا لتأكيد الموعد المناسب.</p>
+                    </div>
+                    <form onSubmit={handleFormSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">الاسم الكامل</label>
+                        <Input placeholder="أدخل اسمك الكريم" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">رقم الجوال</label>
+                        <Input type="tel" dir="rtl" placeholder="05x xxx xxxx" className="font-en text-right" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">نوع الفحص (اختياري)</label>
+                        <select className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                          <option>فحص شامل</option>
+                          <option>تحاليل دم روتينية</option>
+                          <option>فحص فيتامينات</option>
+                          <option>غير متأكد</option>
+                        </select>
+                      </div>
+                      <Button type="submit" className="w-full mt-2" disabled={formState !== 'idle'}>
+                        {formState === 'idle' && "تأكيد الطلب"}
+                        {formState === 'loading' && "جاري الإرسال..."}
+                        {formState === 'success' && "تم استلام طلبك بنجاح!"}
+                      </Button>
+                    </form>
+                    <div className="mt-6 border-t border-border/60 pt-5 text-center">
+                      <p className="text-sm text-muted-foreground">هل أجريت تحليلك بالفعل؟</p>
+                      <Button variant="link" className="mt-1 h-auto p-0 text-primary" asChild>
+                        <Link href="/results">انتقل إلى صفحة النتائج</Link>
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -365,10 +365,7 @@ export default function Home() {
                     </div>
                     <Button
                       className="w-full shrink-0 rounded-full sm:w-auto"
-                      onClick={() => {
-                        document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
-                        setActiveTab('book')
-                      }}
+                       onClick={() => document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })}
                     >
                       احجز الآن
                     </Button>
@@ -416,10 +413,7 @@ export default function Home() {
                       <Button
                         size="sm"
                         className="w-full rounded-full bg-white text-primary hover:bg-white/90"
-                        onClick={() => {
-                          document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
-                          setActiveTab('book')
-                        }}
+                         onClick={() => document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })}
                       >
                         احجز هذه الباقة
                       </Button>
@@ -529,7 +523,7 @@ export default function Home() {
               <AccordionItem value="item-2">
                 <AccordionTrigger>كيف يمكنني استلام نتائج تحاليلي؟</AccordionTrigger>
                 <AccordionContent>
-                  نوفر عدة طرق لاستلام النتائج لراحتكم: عبر بوابتنا الإلكترونية (أعلاه) بإدخال رقم الهوية، عبر رسالة واتساب مجرد صدور النتيجة، أو مطبوعة بزيارة فرع المختبر.
+                  نوفر عدة طرق لاستلام النتائج لراحتكم: عبر صفحة النتائج بإدخال رقم التحليل أو الملف، عبر رسالة واتساب بمجرد صدور النتيجة، أو مطبوعة بزيارة فرع المختبر.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
@@ -557,8 +551,8 @@ export default function Home() {
               لا تؤجل الاطمئنان على صحتك. احجز موعدك اليوم بخطوات بسيطة ودع فريقنا الطبي يعتني بك.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 w-full sm:w-auto rounded-full font-bold px-8">
-                احجز موعدك الآن
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 w-full sm:w-auto rounded-full font-bold px-8" asChild>
+                <a href={homeAnchor("book")}>احجز موعدك الآن</a>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 w-full sm:w-auto rounded-full gap-2">
                 <PhoneCall className="h-5 w-5" />
