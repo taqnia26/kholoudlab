@@ -18,6 +18,42 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * Sends a validated appointment request to the laboratory team.
+ * @summary Submit an appointment booking request
+ */
+export const createBookingBodyNameMin = 2;
+export const createBookingBodyNameMax = 100;
+
+
+export const createBookingBodyNameRegExp = new RegExp('.*\\S.*');
+export const createBookingBodyPhoneMin = 9;
+export const createBookingBodyPhoneMax = 20;
+
+
+export const createBookingBodyPhoneRegExp = new RegExp('^(?=(?:\\D*\\d){9,15}\\D*$)[0-9+() -]+$');
+export const createBookingBodyTestTypeMin = 2;
+export const createBookingBodyTestTypeMax = 100;
+
+
+export const createBookingBodyTestTypeRegExp = new RegExp('.*\\S.*');
+export const createBookingBodyWebsiteMax = 200;
+
+
+
+export const CreateBookingBody = zod.object({
+  "name": zod.string().min(createBookingBodyNameMin).max(createBookingBodyNameMax).regex(createBookingBodyNameRegExp),
+  "phone": zod.string().min(createBookingBodyPhoneMin).max(createBookingBodyPhoneMax).regex(createBookingBodyPhoneRegExp),
+  "testType": zod.string().min(createBookingBodyTestTypeMin).max(createBookingBodyTestTypeMax).regex(createBookingBodyTestTypeRegExp),
+  "website": zod.string().max(createBookingBodyWebsiteMax).optional()
+})
+
+export const CreateBookingResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
  * Starts a verification challenge without revealing whether a report exists.
  * @summary Start secure result verification
  */

@@ -169,6 +169,21 @@
   transform: translateY(0);
 }
 
+@keyframes hero-slider-glow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.01);
+  }
+}
+
+.hero-slider-glow {
+  animation: hero-slider-glow 6s ease-in-out infinite;
+}
+
 @keyframes national-day-slide-from-left {
   from {
     opacity: 0.7;
@@ -206,8 +221,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll,
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero-slider-glow,
   .national-day-slide {
-    animation-duration: 1ms;
+    animation: none;
+    transition: none;
   }
 }
 

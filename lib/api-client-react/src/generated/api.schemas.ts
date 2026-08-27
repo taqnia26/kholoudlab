@@ -13,6 +13,34 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface BookingInput {
+  /**
+     * @minLength 2
+     * @maxLength 100
+     * @pattern .*\S.*
+     */
+  name: string;
+  /**
+     * @minLength 9
+     * @maxLength 20
+     * @pattern ^(?=(?:\D*\d){9,15}\D*$)[0-9+() -]+$
+     */
+  phone: string;
+  /**
+     * @minLength 2
+     * @maxLength 100
+     * @pattern .*\S.*
+     */
+  testType: string;
+  /** @maxLength 200 */
+  website?: string;
+}
+
+export interface BookingConfirmation {
+  success: boolean;
+  message: string;
+}
+
 export type ResultStatus = typeof ResultStatus[keyof typeof ResultStatus];
 
 

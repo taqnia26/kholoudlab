@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './bookingConfirmation';
+export * from './bookingInput';
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './resultStatus';

@@ -7,32 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
+import { useCreateBooking } from "@workspace/api-client-react"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
   Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
-  PhoneCall, CalendarCheck
+  PhoneCall, CalendarCheck, Pause, Play
 } from "lucide-react"
-
-const heroSlides = [
-  {
-    image: "/assets/kholoud-lab-hero.jpg",
-    alt: "أخصائية مختبر تعمل على تحليل العينات داخل مختبر حديث",
-    eyebrow: "دقة تبدأ من العينة",
-    title: "نتائج موثوقة لصحة أكثر اطمئنانًا",
-  },
-  {
-    image: "/assets/kholoud-offer-01.jpg",
-    alt: "عرض الفحص الشامل من مختبر خلود",
-    eyebrow: "عروض مختبر خلود",
-    title: "اختاري الفحص الأنسب لكِ ولعائلتك",
-  },
-  {
-    image: "/assets/kholoud-offer-10.jpg",
-    alt: "عرض باقة هرمونات المرأة من مختبر خلود",
-    eyebrow: "فحوصات متخصصة",
-    title: "رعاية مخبرية تفهم احتياجاتك",
-  },
-]
 
 const offerImages = Array.from(
   { length: 45 },
@@ -42,15 +22,26 @@ const offerImages = Array.from(
 const nationalDayOfferImages = Array.from(
   { length: 8 },
   (_, index) =>
-    `/assets/national-day-96/national-day-96-${String(index + 1).padStart(2, "0")}.png`,
+    `/assets/national-day-96/web/national-day-96-${String(index + 1).padStart(2, "0")}.webp`,
 )
 
 export default function Home() {
-  const [formState, setFormState] = useState<'idle' | 'loading' | 'success'>('idle')
-  const [activeHeroSlide, setActiveHeroSlide] = useState(0)
+  const [bookingForm, setBookingForm] = useState({
+    name: "",
+    phone: "",
+    testType: "فحص شامل",
+    website: "",
+  })
+  const [formMessage, setFormMessage] = useState<{
+    type: "success" | "error"
+    text: string
+  } | null>(null)
   const [activeNationalDayOffer, setActiveNationalDayOffer] = useState(0)
   const [nationalDaySlideDirection, setNationalDaySlideDirection] = useState(1)
+  const [isHeroAutoPlayPaused, setIsHeroAutoPlayPaused] = useState(false)
+  const [isHeroInteractionPaused, setIsHeroInteractionPaused] = useState(false)
   const [scrollPosition, setScrollPosition] = useState(0)
+  const createBooking = useCreateBooking()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -72,20 +63,31 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    if (
+      isHeroAutoPlayPaused ||
+      isHeroInteractionPaused ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) return
+
     const timer = window.setInterval(() => {
-      setActiveHeroSlide((current) => (current + 1) % heroSlides.length)
-    }, 6500)
-
-    return () => window.clearInterval(timer)
-  }, [])
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
       setNationalDaySlideDirection(1)
       setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
     }, 5000)
 
-    return () => window.clearTimeout(timer)
+    return () => window.clearInterval(timer)
+  }, [isHeroAutoPlayPaused, isHeroInteractionPaused])
+
+  useEffect(() => {
+    const adjacentOffers = [
+      (activeNationalDayOffer + 1) % nationalDayOfferImages.length,
+      (activeNationalDayOffer - 1 + nationalDayOfferImages.length) %
+        nationalDayOfferImages.length,
+    ]
+
+    adjacentOffers.forEach((index) => {
+      const image = new Image()
+      image.src = nationalDayOfferImages[index]
+    })
   }, [activeNationalDayOffer])
 
   useEffect(() => {
@@ -125,13 +127,25 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setFormState('loading')
-    setTimeout(() => {
-      setFormState('success')
-      setTimeout(() => setFormState('idle'), 3000)
-    }, 1500)
+    setFormMessage(null)
+
+    try {
+      const response = await createBooking.mutateAsync({ data: bookingForm })
+      setFormMessage({ type: "success", text: response.message })
+      setBookingForm({
+        name: "",
+        phone: "",
+        testType: "فحص شامل",
+        website: "",
+      })
+    } catch {
+      setFormMessage({
+        type: "error",
+        text: "تعذر إرسال الطلب الآن. يرجى المحاولة مرة أخرى أو التواصل معنا هاتفيًا.",
+      })
+    }
   }
 
   const visibleOffers = offerImages.slice(0, 8)
@@ -201,58 +215,111 @@ export default function Home() {
 
               {/* Hero Slider + Interactive Portal */}
               <div id="portal" className="w-full lg:w-1/2 max-w-xl mx-auto lg:mx-0 reveal-on-scroll" style={{ transitionDelay: '0.2s' }}>
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-primary/10 shadow-2xl shadow-primary/15">
-                  {heroSlides.map((slide, index) => (
-                    <div
-                      key={slide.image}
-                      className={`absolute inset-0 transition-opacity duration-700 ${activeHeroSlide === index ? "opacity-100" : "pointer-events-none opacity-0"}`}
-                      aria-hidden={activeHeroSlide !== index}
-                    >
-                      <img
-                        src={slide.image}
-                        alt={slide.alt}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-8">
-                        <p className="mb-2 text-sm font-bold text-white/80">{slide.eyebrow}</p>
-                        <p className="max-w-sm text-xl font-bold leading-tight md:text-2xl">{slide.title}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div
+                  className="hero-slider-frame relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-[#f4f2e8] shadow-2xl shadow-primary/15"
+                  role="region"
+                  aria-roledescription="سلايدر"
+                  aria-label="عروض اليوم الوطني السعودي 96"
+                  onMouseEnter={() => setIsHeroInteractionPaused(true)}
+                  onMouseLeave={() => setIsHeroInteractionPaused(false)}
+                  onFocus={() => setIsHeroInteractionPaused(true)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) {
+                      setIsHeroInteractionPaused(false)
+                    }
+                  }}
+                >
+                  <div className="hero-slider-glow pointer-events-none absolute -inset-8 z-10 rounded-[2.5rem] border border-white/40" />
+                  <a
+                    key={nationalDayOfferImages[activeNationalDayOffer]}
+                    href={nationalDayOfferImages[activeNationalDayOffer]}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`عرض اليوم الوطني رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
+                    className={`national-day-slide absolute inset-0 flex items-center justify-center p-1.5 opacity-100 sm:p-3 ${
+                      nationalDaySlideDirection > 0
+                        ? "national-day-slide-from-left"
+                        : "national-day-slide-from-right"
+                    }`}
+                  >
+                    <img
+                      src={nationalDayOfferImages[activeNationalDayOffer]}
+                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
+                      width="1080"
+                      height="1350"
+                      fetchPriority={activeNationalDayOffer === 0 ? "high" : "auto"}
+                      className="h-full w-full object-contain"
+                    />
+                  </a>
 
-                  <div className="absolute inset-x-5 top-5 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm" aria-label="التنقل بين صور السلايدر">
-                      {heroSlides.map((slide, index) => (
+                  <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-3 sm:inset-x-5 sm:top-5">
+                    <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-2 backdrop-blur-sm" aria-label="التنقل بين عروض اليوم الوطني">
+                      {nationalDayOfferImages.map((image, index) => (
                         <button
-                          key={`${slide.image}-dot`}
+                          key={`${image}-dot`}
                           type="button"
-                          aria-label={`عرض الصورة ${index + 1}`}
-                          aria-current={activeHeroSlide === index}
-                          onClick={() => setActiveHeroSlide(index)}
-                          className={`h-2 rounded-full transition-all ${activeHeroSlide === index ? "w-7 bg-white" : "w-2 bg-white/60 hover:bg-white"}`}
+                          aria-label={`عرض اليوم الوطني رقم ${index + 1}`}
+                          aria-current={activeNationalDayOffer === index ? "true" : undefined}
+                          onClick={() => {
+                            setNationalDaySlideDirection(index >= activeNationalDayOffer ? 1 : -1)
+                            setActiveNationalDayOffer(index)
+                          }}
+                          className={`h-2 rounded-full transition-all ${activeNationalDayOffer === index ? "w-6 bg-white" : "w-2 bg-white/65 hover:bg-white"}`}
                         />
                       ))}
                     </div>
-                    <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-primary shadow-sm">مختبر خلود</span>
+                    <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-primary shadow-sm">
+                      اليوم الوطني 96
+                    </span>
                   </div>
 
                   <button
                     type="button"
-                    aria-label="الصورة السابقة"
-                    onClick={() => setActiveHeroSlide((activeHeroSlide - 1 + heroSlides.length) % heroSlides.length)}
-                    className="absolute left-4 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition-transform hover:scale-105 md:left-5"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="الصورة التالية"
-                    onClick={() => setActiveHeroSlide((activeHeroSlide + 1) % heroSlides.length)}
-                    className="absolute right-4 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm transition-transform hover:scale-105 md:right-5"
+                    aria-label="العرض التالي"
+                    onClick={() => {
+                      setNationalDaySlideDirection(1)
+                      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
+                    }}
+                    className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25 sm:left-5"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
+
+                  <button
+                    type="button"
+                    aria-label={
+                      isHeroAutoPlayPaused
+                        ? "تشغيل الانتقال التلقائي للعروض"
+                        : "إيقاف الانتقال التلقائي للعروض"
+                    }
+                    aria-pressed={isHeroAutoPlayPaused}
+                    onClick={() => setIsHeroAutoPlayPaused((current) => !current)}
+                    className="absolute bottom-3 left-1/2 z-20 flex h-9 -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/45 px-3 text-xs font-bold text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-black/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 sm:bottom-5"
+                  >
+                    {isHeroAutoPlayPaused ? (
+                      <Play className="h-4 w-4" />
+                    ) : (
+                      <Pause className="h-4 w-4" />
+                    )}
+                    {isHeroAutoPlayPaused ? "تشغيل" : "إيقاف"}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="العرض السابق"
+                    onClick={() => {
+                      setNationalDaySlideDirection(-1)
+                      setActiveNationalDayOffer((current) => (current - 1 + nationalDayOfferImages.length) % nationalDayOfferImages.length)
+                    }}
+                    className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25 sm:right-5"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+
+                  <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center sm:bottom-5">
+                    <span className="rounded-full bg-black/45 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
+                      العرض {activeNationalDayOffer + 1} من {nationalDayOfferImages.length}
+                    </span>
+                  </div>
                 </div>
 
                 <Card id="book" className="relative z-10 mt-6 overflow-hidden border-primary/10 shadow-2xl shadow-primary/10">
@@ -264,27 +331,99 @@ export default function Home() {
                       <p className="mt-2 text-sm text-muted-foreground">اترك بياناتك وسيتواصل معك فريقنا لتأكيد الموعد المناسب.</p>
                     </div>
                     <form onSubmit={handleFormSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">الاسم الكامل</label>
-                        <Input placeholder="أدخل اسمك الكريم" required />
+                      <div className="sr-only" aria-hidden="true">
+                        <label htmlFor="booking-website">الموقع الإلكتروني</label>
+                        <input
+                          id="booking-website"
+                          name="website"
+                          type="text"
+                          tabIndex={-1}
+                          autoComplete="off"
+                          value={bookingForm.website}
+                          onChange={(event) =>
+                            setBookingForm((current) => ({
+                              ...current,
+                              website: event.target.value,
+                            }))
+                          }
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">رقم الجوال</label>
-                        <Input type="tel" dir="rtl" placeholder="05x xxx xxxx" className="font-en text-right" required />
+                        <label htmlFor="booking-name" className="text-sm font-medium text-foreground">الاسم الكامل</label>
+                        <Input
+                          id="booking-name"
+                          name="name"
+                          autoComplete="name"
+                          placeholder="أدخل اسمك الكريم"
+                          minLength={2}
+                          maxLength={100}
+                          value={bookingForm.name}
+                          onChange={(event) =>
+                            setBookingForm((current) => ({
+                              ...current,
+                              name: event.target.value,
+                            }))
+                          }
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">نوع الفحص (اختياري)</label>
-                        <select className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                          <option>فحص شامل</option>
-                          <option>تحاليل دم روتينية</option>
-                          <option>فحص فيتامينات</option>
-                          <option>غير متأكد</option>
+                        <label htmlFor="booking-phone" className="text-sm font-medium text-foreground">رقم الجوال</label>
+                        <Input
+                          id="booking-phone"
+                          name="phone"
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          dir="ltr"
+                          placeholder="05x xxx xxxx"
+                          className="font-en text-right"
+                          minLength={9}
+                          maxLength={20}
+                          value={bookingForm.phone}
+                          onChange={(event) =>
+                            setBookingForm((current) => ({
+                              ...current,
+                              phone: event.target.value,
+                            }))
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="booking-test-type" className="text-sm font-medium text-foreground">نوع الفحص</label>
+                        <select
+                          id="booking-test-type"
+                          name="testType"
+                          value={bookingForm.testType}
+                          onChange={(event) =>
+                            setBookingForm((current) => ({
+                              ...current,
+                              testType: event.target.value,
+                            }))
+                          }
+                          className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                        >
+                          <option value="فحص شامل">فحص شامل</option>
+                          <option value="تحاليل دم روتينية">تحاليل دم روتينية</option>
+                          <option value="فحص فيتامينات">فحص فيتامينات</option>
+                          <option value="غير متأكد">غير متأكد</option>
                         </select>
                       </div>
-                      <Button type="submit" className="w-full mt-2" disabled={formState !== 'idle'}>
-                        {formState === 'idle' && "تأكيد الطلب"}
-                        {formState === 'loading' && "جاري الإرسال..."}
-                        {formState === 'success' && "تم استلام طلبك بنجاح!"}
+                      {formMessage && (
+                        <p
+                          role={formMessage.type === "error" ? "alert" : "status"}
+                          className={`rounded-xl border px-4 py-3 text-sm font-medium ${
+                            formMessage.type === "success"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                              : "border-red-200 bg-red-50 text-red-700"
+                          }`}
+                        >
+                          {formMessage.text}
+                        </p>
+                      )}
+                      <Button type="submit" className="w-full mt-2" disabled={createBooking.isPending}>
+                        {createBooking.isPending ? "جاري إرسال الطلب..." : "تأكيد الطلب"}
                       </Button>
                     </form>
                     <div className="mt-6 border-t border-border/60 pt-5 text-center">
@@ -392,105 +531,6 @@ export default function Home() {
             <Button variant="outline" className="w-full mt-8 md:hidden rounded-full">
               عرض كافة الباقات
             </Button>
-          </div>
-        </section>
-
-        {/* NATIONAL DAY OFFERS */}
-        <section id="national-day-offers" className="relative overflow-hidden bg-[#f4f2e8] py-24">
-          <div className="absolute -right-40 top-16 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-          <div className="container relative z-10 mx-auto px-4 md:px-6">
-            <div className="mx-auto mb-14 max-w-2xl text-center reveal-on-scroll">
-              <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">
-                اليوم الوطني السعودي 96
-              </span>
-              <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
-                عروض اليوم الوطني
-              </h2>
-              <p className="text-muted-foreground">
-                اكتشفي باقات مختبر خلود الخاصة باليوم الوطني، واضغطي على أي صورة لعرض تفاصيل العرض بالحجم الكامل.
-              </p>
-            </div>
-
-            <div className="mx-auto max-w-xl reveal-on-scroll">
-              <Card className="overflow-hidden border-primary/10 bg-white p-2 shadow-xl shadow-primary/10">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-secondary/20">
-                  <a
-                    key={nationalDayOfferImages[activeNationalDayOffer]}
-                    href={nationalDayOfferImages[activeNationalDayOffer]}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`عرض اليوم الوطني رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
-                    className={`national-day-slide absolute inset-0 block ${
-                      nationalDaySlideDirection > 0
-                        ? "national-day-slide-from-left"
-                        : "national-day-slide-from-right"
-                    }`}
-                  >
-                    <img
-                      src={nationalDayOfferImages[activeNationalDayOffer]}
-                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
-                      className="block h-full w-full object-contain"
-                    />
-                  </a>
-
-                  <button
-                    type="button"
-                    aria-label="العرض التالي"
-                    onClick={() => {
-                      setNationalDaySlideDirection(1)
-                      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
-                    }}
-                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg backdrop-blur-sm transition-colors hover:bg-white"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="العرض السابق"
-                    onClick={() => {
-                      setNationalDaySlideDirection(-1)
-                      setActiveNationalDayOffer((current) => (current - 1 + nationalDayOfferImages.length) % nationalDayOfferImages.length)
-                    }}
-                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg backdrop-blur-sm transition-colors hover:bg-white"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                </div>
-              </Card>
-
-              <div className="mt-5 flex items-center justify-center gap-2" aria-label="مؤشر عروض اليوم الوطني">
-                {nationalDayOfferImages.map((image, index) => (
-                  <button
-                    key={image}
-                    type="button"
-                    aria-label={`عرض اليوم الوطني رقم ${index + 1}`}
-                    aria-current={activeNationalDayOffer === index ? "true" : undefined}
-                    onClick={() => {
-                      setNationalDaySlideDirection(index > activeNationalDayOffer ? 1 : -1)
-                      setActiveNationalDayOffer(index)
-                    }}
-                    className={`h-2.5 rounded-full transition-all ${
-                      activeNationalDayOffer === index
-                        ? "w-8 bg-primary"
-                        : "w-2.5 bg-primary/25 hover:bg-primary/50"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
-                العرض {activeNationalDayOffer + 1} من {nationalDayOfferImages.length}
-              </p>
-            </div>
-
-            <div className="mt-12 flex justify-center reveal-on-scroll">
-              <a
-                href={homeAnchor("portal")}
-                className="inline-flex items-center justify-center rounded-full bg-primary px-7 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary/90"
-              >
-                احجزي موعدك الآن
-                <ChevronLeft className="mr-2 h-4 w-4" />
-              </a>
-            </div>
           </div>
         </section>
 
