@@ -1,5 +1,5 @@
-import { ReplitConnectors } from "@replit/connectors-sdk";
 import { Router, type IRouter } from "express";
+import { Resend } from "resend";
 import {
   CreateBookingBody,
   CreateBookingResponse,
@@ -13,6 +13,8 @@ const BOOKING_TO_EMAIL =
   process.env.BOOKING_TO_EMAIL ?? "info@kholoudlab.com";
 const BOOKING_FROM_EMAIL =
   process.env.BOOKING_FROM_EMAIL ?? "info@kholoudlab.com";
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 function escapeHtml(value: string): string {
   return value
@@ -93,47 +95,45 @@ router.post("/bookings", async (req, res): Promise<void> => {
   const emailSubjectName = name.replace(/[\r\n]+/g, " ").trim();
 
   try {
-    const connectors = new ReplitConnectors();
-    const providerResponse = await connectors.proxy("resend", "/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: `موقع مختبر خلود <${BOOKING_FROM_EMAIL}>`,
-        to: [BOOKING_TO_EMAIL],
-        subject: `طلب حجز موعد جديد - ${emailSubjectName}`,
-        html: `
-          <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.8; color: #2f2530;">
-            <h2 style="color: #a02060;">طلب حجز موعد جديد</h2>
-            <p>تم إرسال طلب جديد من نموذج موقع مختبر خلود.</p>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">الاسم الكامل</td>
-                <td style="padding: 10px; border: 1px solid #eadde4;">${safeName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">رقم الجوال</td>
-                <td dir="ltr" style="padding: 10px; border: 1px solid #eadde4; text-align: right;">${safePhone}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">نوع الفحص</td>
-                <td style="padding: 10px; border: 1px solid #eadde4;">${safeTestType}</td>
-              </tr>
-            </table>
-          </div>
-        `,
-        text: [
-          "طلب حجز موعد جديد",
-          `الاسم الكامل: ${name.trim()}`,
-          `رقم الجوال: ${phone.trim()}`,
-          `نوع الفحص: ${testType.trim()}`,
-        ].join("\n"),
-      }),
+    if (!resend) {
+      throw new Error("RESEND_API_KEY is not configured.");
+    }
+
+    const { error: resendError } = await resend.emails.send({
+      from: `موقع مختبر خلود <${BOOKING_FROM_EMAIL}>`,
+      to: [BOOKING_TO_EMAIL],
+      subject: `طلب حجز موعد جديد - ${emailSubjectName}`,
+      html: `
+        <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.8; color: #2f2530;">
+          <h2 style="color: #a02060;">طلب حجز موعد جديد</h2>
+          <p>تم إرسال طلب جديد من نموذج موقع مختبر خلود.</p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">الاسم الكامل</td>
+              <td style="padding: 10px; border: 1px solid #eadde4;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">رقم الجوال</td>
+              <td dir="ltr" style="padding: 10px; border: 1px solid #eadde4; text-align: right;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #eadde4; font-weight: bold;">نوع الفحص</td>
+              <td style="padding: 10px; border: 1px solid #eadde4;">${safeTestType}</td>
+            </tr>
+          </table>
+        </div>
+      `,
+      text: [
+        "طلب حجز موعد جديد",
+        `الاسم الكامل: ${name.trim()}`,
+        `رقم الجوال: ${phone.trim()}`,
+        `نوع الفحص: ${testType.trim()}`,
+      ].join("\n"),
     });
 
-    if (!providerResponse.ok) {
-      const providerError = (await providerResponse.text()).slice(0, 500);
+    if (resendError) {
       req.log.error(
-        { status: providerResponse.status, providerError },
+        { resendError },
         "Resend rejected booking email",
       );
       res
