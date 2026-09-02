@@ -1,6 +1,6 @@
 import { useEffect, type ElementType } from "react"
 import { Link } from "wouter"
-import { BriefcaseBusiness, CalendarCheck, FileText, Globe, House, MapPin, PhoneCall } from "lucide-react"
+import { BriefcaseBusiness, CalendarCheck, Globe, House, MapPin, PhoneCall } from "lucide-react"
 import { FaInstagram, FaSnapchat, FaTiktok, FaWhatsapp } from "react-icons/fa6"
 import { JobApplicationDialog } from "@/components/job-application-dialog"
 import { cn, homeAnchor } from "@/lib/utils"
@@ -49,14 +49,6 @@ const actions: ActionItem[] = [
     icon: House,
     brand: "primary",
     href: whatsappUrl("مرحباً، أرغب بطلب زيارة منزلية لسحب العينة."),
-    newTab: true,
-  },
-  {
-    id: "results",
-    label: "نتائج التحاليل",
-    icon: FileText,
-    brand: "primary",
-    href: whatsappUrl("مرحباً، أود الاستعلام عن نتائج التحاليل الخاصة بي."),
     newTab: true,
   },
   {
@@ -122,7 +114,7 @@ export default function OurServicesContacts() {
   useEffect(() => {
     const previousTitle = document.title
     const description =
-      "خدمات مختبر خلود المباشرة: حجز موعد، زيارة منزلية، واتساب، نتائج التحاليل، التوظيف، الاتصال وموقع المختبر."
+      "خدمات مختبر خلود المباشرة: حجز موعد، زيارة منزلية، واتساب، التوظيف، الاتصال وموقع المختبر."
     const metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]')
     const ogDescription = document.querySelector<HTMLMetaElement>('meta[property="og:description"]')
