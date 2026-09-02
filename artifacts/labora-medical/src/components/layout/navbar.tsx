@@ -76,7 +76,6 @@ export function Navbar() {
     { label: "الرئيسية", href: "/" },
     { label: "خدماتنا", anchor: "services" },
     { label: "باقات الفحص", anchor: "packages" },
-    { label: "النتائج", href: "/results" },
     { label: "من نحن", href: "/about" },
   ]
 

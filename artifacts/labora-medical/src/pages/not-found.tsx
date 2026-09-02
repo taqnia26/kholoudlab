@@ -1,9 +1,27 @@
+import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
+  useEffect(() => {
+    const previousTitle = document.title;
+    const robots =
+      document.querySelector('meta[name="robots"]') ??
+      document.head.appendChild(document.createElement('meta'));
+    const previousRobots = robots.getAttribute('content');
+
+    document.title = 'الصفحة غير موجودة | مختبر خلود';
+    robots.setAttribute('name', 'robots');
+    robots.setAttribute('content', 'noindex, nofollow');
+
+    return () => {
+      document.title = previousTitle;
+      robots.setAttribute('content', previousRobots ?? 'index, follow');
+    };
+  }, []);
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4" dir="rtl">
       <Card className="w-full max-w-md shadow-xl border-primary/20">

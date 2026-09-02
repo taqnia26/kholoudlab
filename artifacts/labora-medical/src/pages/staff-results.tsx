@@ -57,7 +57,7 @@ export default function StaffResults() {
     robots.setAttribute("name", "robots")
     robots.setAttribute("content", "noindex, nofollow")
     return () => {
-      document.title = "مختبر خلود للتحاليل الطبية | نتائج موثوقة"
+      document.title = "مختبر خلود للتحاليل الطبية | فحوصات وحجز موعد"
       robots.setAttribute("content", "index, follow")
     }
   }, [])

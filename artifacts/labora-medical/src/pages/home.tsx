@@ -204,12 +204,6 @@ export default function Home() {
                     <CalendarCheck className="h-5 w-5" />
                     احجز موعدك الآن
                   </Button>
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 rounded-full" asChild>
-                    <Link href="/results">
-                    <FileText className="h-5 w-5" />
-                    استعلام عن النتائج
-                    </Link>
-                  </Button>
                 </div>
               </div>
 
@@ -426,12 +420,6 @@ export default function Home() {
                         {createBooking.isPending ? "جاري إرسال الطلب..." : "تأكيد الطلب"}
                       </Button>
                     </form>
-                    <div className="mt-6 border-t border-border/60 pt-5 text-center">
-                      <p className="text-sm text-muted-foreground">هل أجريت تحليلك بالفعل؟</p>
-                      <Button variant="link" className="mt-1 h-auto p-0 text-primary" asChild>
-                        <Link href="/results">انتقل إلى صفحة النتائج</Link>
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -444,8 +432,8 @@ export default function Home() {
         <section id="services" className="py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-2xl mx-auto mb-16 reveal-on-scroll">
-              <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">تخصصاتنا المخبرية</h2>
-              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">خدمات تشخيصية شاملة</h3>
+              <p className="text-sm font-bold text-primary tracking-wider uppercase mb-3">تخصصاتنا المخبرية</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">خدمات تشخيصية شاملة</h2>
               <p className="text-muted-foreground">نغطي كافة التخصصات المخبرية الدقيقة لضمان توفير صورة كاملة وواضحة عن حالتك الصحية.</p>
             </div>
 
@@ -480,8 +468,8 @@ export default function Home() {
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 reveal-on-scroll">
               <div className="max-w-2xl">
-                <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">عروض الفحوصات</h2>
-                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">باقات مصممة لاحتياجاتك</h3>
+                <p className="text-sm font-bold text-primary tracking-wider uppercase mb-3">عروض الفحوصات</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">باقات مصممة لاحتياجاتك</h2>
               <p className="text-muted-foreground">استعرض أحدث عروض مختبر خلود واختر الفحص الأنسب لك ولعائلتك براحة ووضوح.</p>
               </div>
               <Button variant="outline" className="hidden md:flex mt-6 md:mt-0 rounded-full">
@@ -539,8 +527,8 @@ export default function Home() {
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-start justify-between gap-6 mb-12 md:flex-row md:items-end reveal-on-scroll">
               <div className="max-w-2xl">
-                <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">من عروضنا</h2>
-                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">اختاري باقتك بكل وضوح</h3>
+                <p className="text-sm font-bold text-primary tracking-wider uppercase mb-3">من عروضنا</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">اختاري باقتك بكل وضوح</h2>
                 <p className="text-muted-foreground">
                   مجموعة من عروض مختبر خلود المصممة لتناسب احتياجاتك الصحية المختلفة، مع تفاصيل الفحوصات والأسعار داخل كل تصميم.
                 </p>
@@ -603,8 +591,8 @@ export default function Home() {
               </div>
 
               <div className="w-full lg:w-1/2 reveal-on-scroll">
-                <h2 className="text-sm font-bold text-primary tracking-wider uppercase mb-3">لماذا مختبر خلود؟</h2>
-                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">رحلة الرعاية تبدأ بتشخيص دقيق</h3>
+                <p className="text-sm font-bold text-primary tracking-wider uppercase mb-3">لماذا مختبر خلود؟</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">رحلة الرعاية تبدأ بتشخيص دقيق</h2>
                 <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
                   نحن ندرك أن وراء كل عينة إنسان ينتظر إجابات. لذلك، صممنا مختبرنا ليكون بيئة مريحة وموثوقة، تعتمد على تقنيات الذكاء الاصطناعي والميكنة الكاملة لتقليل التدخل البشري وضمان دقة مطلقة في وقت قياسي.
                 </p>
@@ -668,7 +656,7 @@ export default function Home() {
               <AccordionItem value="item-2">
                 <AccordionTrigger>كيف يمكنني استلام نتائج تحاليلي؟</AccordionTrigger>
                 <AccordionContent>
-                  نوفر عدة طرق لاستلام النتائج لراحتكم: عبر صفحة النتائج بإدخال رقم التحليل أو الملف، عبر رسالة واتساب بمجرد صدور النتيجة، أو مطبوعة بزيارة فرع المختبر.
+                  يمكن استلام النتائج عبر رسالة واتساب بعد اعتمادها، أو مطبوعة بزيارة فرع المختبر. للاستفسار تواصل معنا على الرقم الموضح في الموقع.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">

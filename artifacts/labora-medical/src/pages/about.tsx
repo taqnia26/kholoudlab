@@ -54,7 +54,7 @@ export default function About() {
     }
     tag.setAttribute("content", description)
     return () => {
-      document.title = "مختبر خلود للتحاليل الطبية | نتائج موثوقة"
+      document.title = "مختبر خلود للتحاليل الطبية | فحوصات وحجز موعد"
     }
   }, [])
 
@@ -81,9 +81,6 @@ export default function About() {
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Button className="rounded-full" asChild>
                     <a href={homeAnchor("book")}>احجز موعدك الآن</a>
-                  </Button>
-                  <Button variant="outline" className="rounded-full" asChild>
-                    <Link href="/results">استعلام عن النتائج</Link>
                   </Button>
                 </div>
               </div>
@@ -201,13 +198,10 @@ export default function About() {
           <div className="container mx-auto px-4 text-center md:px-6">
             <Users className="mx-auto mb-5 h-9 w-9 text-white/90" />
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">نحن هنا لراحتك</h2>
-            <p className="mx-auto mb-8 max-w-2xl leading-relaxed text-white/80">ابدأ زيارتك القادمة بخطوة بسيطة، أو اطلع على نتائجك من الصفحة المخصصة.</p>
+            <p className="mx-auto mb-8 max-w-2xl leading-relaxed text-white/80">ابدأ زيارتك القادمة بخطوة بسيطة، واحجز موعدك مع فريق مختبر خلود.</p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button className="rounded-full bg-white px-7 font-bold text-primary hover:bg-white/90" asChild>
                 <a href={homeAnchor("book")}>احجز موعدك الآن</a>
-              </Button>
-              <Button variant="outline" className="rounded-full border-white text-white hover:bg-white/10" asChild>
-                <Link href="/results">الوصول إلى النتائج</Link>
               </Button>
             </div>
           </div>

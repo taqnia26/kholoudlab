@@ -24,7 +24,6 @@ export function Footer() {
             <ul className="space-y-4">
                <li><a href={homeAnchor("services")} className="text-muted-foreground hover:text-primary transition-colors">خدماتنا الطبية</a></li>
                <li><a href={homeAnchor("packages")} className="text-muted-foreground hover:text-primary transition-colors">باقات الفحص الشامل</a></li>
-               <li><Link href="/results" className="text-muted-foreground hover:text-primary transition-colors">استعلام عن النتائج</Link></li>
                <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">عن المختبر</Link></li>
             </ul>
           </div>
@@ -32,9 +31,17 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-bold mb-6 text-foreground">معلومات التواصل</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
+              <li>
+                <a
+                  href="https://maps.app.goo.gl/gCdW24wQmYMrLJGv6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="فتح موقع مختبر خلود على خرائط Google"
+                  className="flex items-start gap-3 text-muted-foreground transition-colors hover:text-primary"
+                >
                 <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <span className="text-muted-foreground text-sm">الرياض، المملكة العربية السعودية<br/>طريق الملك فهد، حي الملقا</span>
+                  <span className="text-sm font-medium">عرض موقع المختبر على خرائط Google</span>
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary shrink-0" />
