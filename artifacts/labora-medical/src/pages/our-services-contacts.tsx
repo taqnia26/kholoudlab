@@ -1,7 +1,8 @@
 import { useEffect, type ElementType } from "react"
 import { Link } from "wouter"
-import { CalendarCheck, FileText, Globe, House, MapPin, PhoneCall } from "lucide-react"
+import { BriefcaseBusiness, CalendarCheck, FileText, Globe, House, MapPin, PhoneCall } from "lucide-react"
 import { FaInstagram, FaSnapchat, FaTiktok, FaWhatsapp } from "react-icons/fa6"
+import { JobApplicationDialog } from "@/components/job-application-dialog"
 import { cn, homeAnchor } from "@/lib/utils"
 
 const whatsappUrl = (message: string) =>
@@ -57,6 +58,12 @@ const actions: ActionItem[] = [
     brand: "primary",
     href: whatsappUrl("مرحباً، أود الاستعلام عن نتائج التحاليل الخاصة بي."),
     newTab: true,
+  },
+  {
+    id: "careers",
+    label: "الفرص الوظيفية",
+    icon: BriefcaseBusiness,
+    brand: "primary",
   },
   {
     id: "location",
@@ -115,7 +122,7 @@ export default function OurServicesContacts() {
   useEffect(() => {
     const previousTitle = document.title
     const description =
-      "روابط مختبر خلود المباشرة: حجز موعد، زيارة منزلية، واتساب، نتائج التحاليل، الاتصال وموقع المختبر."
+      "خدمات مختبر خلود المباشرة: حجز موعد، زيارة منزلية، واتساب، نتائج التحاليل، التوظيف، الاتصال وموقع المختبر."
     const metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]')
     const ogDescription = document.querySelector<HTMLMetaElement>('meta[property="og:description"]')
@@ -123,7 +130,7 @@ export default function OurServicesContacts() {
     const previousOgTitle = ogTitle?.content
     const previousOgDescription = ogDescription?.content
 
-    document.title = "روابط مختبر خلود | KHOLOUD LAB"
+    document.title = "خدمات مختبر خلود | KHOLOUD LAB"
     if (metaDescription) metaDescription.content = description
     if (ogTitle) ogTitle.content = document.title
     if (ogDescription) ogDescription.content = description
@@ -143,7 +150,7 @@ export default function OurServicesContacts() {
       <div className="pointer-events-none absolute -right-28 -top-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
-        <header className="mb-6 flex justify-center">
+        <header className="mb-6 flex flex-col items-center gap-3 text-center">
           <div className="rounded-[1.35rem] border border-primary/10 bg-white p-3 shadow-lg shadow-primary/10">
             <img
               src="/assets/kholoud-lab-logo.png"
@@ -151,6 +158,7 @@ export default function OurServicesContacts() {
               className="h-auto w-28 object-contain"
             />
           </div>
+          <h1 className="text-lg font-extrabold text-foreground">خدمات مختبر خلود</h1>
         </header>
 
         <div className="grid grid-cols-2 gap-2.5">
@@ -185,6 +193,17 @@ export default function OurServicesContacts() {
                 )}
               </>
             )
+
+            if (item.id === "careers") {
+              return (
+                <JobApplicationDialog
+                  key={item.id}
+                  triggerClassName={className}
+                >
+                  {content}
+                </JobApplicationDialog>
+              )
+            }
 
             if (isDisabled || !item.href) {
               return (

@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: bookings
     description: Public appointment booking requests
+  - name: job-applications
+    description: Public laboratory job applications
   - name: results
     description: Secure patient result access
   - name: staff
@@ -57,6 +59,49 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Too many booking attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Email provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job-applications:
+    post:
+      operationId: createJobApplication
+      tags: [job-applications]
+      summary: Submit a laboratory job application
+      description: Sends a job application and attached CV to the laboratory recruitment team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobApplicationInput"
+      responses:
+        "200":
+          description: Job application sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobApplicationConfirmation"
+        "400":
+          description: Invalid job application details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: CV file is too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many application attempts
           content:
             application/json:
               schema:
@@ -277,6 +322,52 @@ components:
           maxLength: 200
       required: [name, phone, testType]
     BookingConfirmation:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success, message]
+    JobApplicationInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          pattern: '.*\S.*'
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          minLength: 9
+          maxLength: 20
+          pattern: '^(?=(?:\D*\d){9,15}\D*$)[0-9+() -]+$'
+        position:
+          type: string
+          maxLength: 100
+        coverLetter:
+          type: string
+          maxLength: 3000
+        fileName:
+          type: string
+          minLength: 1
+          maxLength: 160
+        fileType:
+          type: string
+          enum:
+            - application/pdf
+            - application/msword
+            - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        fileData:
+          type: string
+          minLength: 1
+          maxLength: 7000000
+      required: [name, email, phone, fileName, fileType, fileData]
+    JobApplicationConfirmation:
       type: object
       properties:
         success:

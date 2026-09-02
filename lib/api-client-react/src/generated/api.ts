@@ -24,6 +24,8 @@ import type {
   BookingInput,
   ErrorResponse,
   HealthStatus,
+  JobApplicationConfirmation,
+  JobApplicationInput,
   ResultStatusUpdate,
   ResultVerificationChallenge,
   ResultVerificationCompletion,
@@ -210,6 +212,78 @@ export const useCreateBooking = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getCreateBookingMutationOptions(options));
+    }
+
+export const getCreateJobApplicationUrl = () => {
+
+
+
+
+  return `/api/job-applications`
+}
+
+/**
+ * Sends a job application and attached CV to the laboratory recruitment team.
+ * @summary Submit a laboratory job application
+ */
+export const createJobApplication = async (jobApplicationInput: JobApplicationInput, options?: Parameters<typeof customFetch>[1]): Promise<JobApplicationConfirmation> => {
+
+  return customFetch<JobApplicationConfirmation>(getCreateJobApplicationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(jobApplicationInput)
+  }
+);}
+
+
+
+
+
+export const getCreateJobApplicationMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJobApplication>>, TError,{data: BodyType<JobApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createJobApplication>>, TError,{data: BodyType<JobApplicationInput>}, TContext> => {
+
+const mutationKey = ['createJobApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createJobApplication>>, {data: BodyType<JobApplicationInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createJobApplication(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateJobApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof createJobApplication>>>
+    export type CreateJobApplicationMutationBody = BodyType<JobApplicationInput>
+    export type CreateJobApplicationMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Submit a laboratory job application
+ */
+export const useCreateJobApplication = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJobApplication>>, TError,{data: BodyType<JobApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createJobApplication>>,
+        TError,
+        {data: BodyType<JobApplicationInput>},
+        TContext
+      > => {
+      return useMutation(getCreateJobApplicationMutationOptions(options));
     }
 
 export const getStartResultVerificationUrl = () => {

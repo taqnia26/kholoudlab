@@ -41,6 +41,52 @@ export interface BookingConfirmation {
   message: string;
 }
 
+export type JobApplicationInputFileType = typeof JobApplicationInputFileType[keyof typeof JobApplicationInputFileType];
+
+
+export const JobApplicationInputFileType = {
+  'application/pdf': 'application/pdf',
+  'application/msword': 'application/msword',
+  'application/vndopenxmlformats-officedocumentwordprocessingmldocument': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+} as const;
+
+export interface JobApplicationInput {
+  /**
+     * @minLength 2
+     * @maxLength 100
+     * @pattern .*\S.*
+     */
+  name: string;
+  /** @maxLength 200 */
+  email: string;
+  /**
+     * @minLength 9
+     * @maxLength 20
+     * @pattern ^(?=(?:\D*\d){9,15}\D*$)[0-9+() -]+$
+     */
+  phone: string;
+  /** @maxLength 100 */
+  position?: string;
+  /** @maxLength 3000 */
+  coverLetter?: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  fileName: string;
+  fileType: JobApplicationInputFileType;
+  /**
+     * @minLength 1
+     * @maxLength 7000000
+     */
+  fileData: string;
+}
+
+export interface JobApplicationConfirmation {
+  success: boolean;
+  message: string;
+}
+
 export type ResultStatus = typeof ResultStatus[keyof typeof ResultStatus];
 
 

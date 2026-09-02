@@ -54,6 +54,49 @@ export const CreateBookingResponse = zod.object({
 
 
 /**
+ * Sends a job application and attached CV to the laboratory recruitment team.
+ * @summary Submit a laboratory job application
+ */
+export const createJobApplicationBodyNameMin = 2;
+export const createJobApplicationBodyNameMax = 100;
+
+
+export const createJobApplicationBodyNameRegExp = new RegExp('.*\\S.*');
+export const createJobApplicationBodyEmailMax = 200;
+
+export const createJobApplicationBodyPhoneMin = 9;
+export const createJobApplicationBodyPhoneMax = 20;
+
+
+export const createJobApplicationBodyPhoneRegExp = new RegExp('^(?=(?:\\D*\\d){9,15}\\D*$)[0-9+() -]+$');
+export const createJobApplicationBodyPositionMax = 100;
+
+export const createJobApplicationBodyCoverLetterMax = 3000;
+
+export const createJobApplicationBodyFileNameMax = 160;
+
+export const createJobApplicationBodyFileDataMax = 7000000;
+
+
+
+export const CreateJobApplicationBody = zod.object({
+  "name": zod.string().min(createJobApplicationBodyNameMin).max(createJobApplicationBodyNameMax).regex(createJobApplicationBodyNameRegExp),
+  "email": zod.string().email().max(createJobApplicationBodyEmailMax),
+  "phone": zod.string().min(createJobApplicationBodyPhoneMin).max(createJobApplicationBodyPhoneMax).regex(createJobApplicationBodyPhoneRegExp),
+  "position": zod.string().max(createJobApplicationBodyPositionMax).optional(),
+  "coverLetter": zod.string().max(createJobApplicationBodyCoverLetterMax).optional(),
+  "fileName": zod.string().min(1).max(createJobApplicationBodyFileNameMax),
+  "fileType": zod.enum(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
+  "fileData": zod.string().min(1).max(createJobApplicationBodyFileDataMax)
+})
+
+export const CreateJobApplicationResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
  * Starts a verification challenge without revealing whether a report exists.
  * @summary Start secure result verification
  */
