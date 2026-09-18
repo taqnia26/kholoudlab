@@ -59,7 +59,7 @@ const actions: ActionItem[] = [
   },
   {
     id: "location",
-    label: "موقع المختبر",
+    label: "الموقع بمكة",
     icon: MapPin,
     brand: "primary",
     href: "https://maps.app.goo.gl/gCdW24wQmYMrLJGv6",
@@ -114,7 +114,7 @@ export default function OurServicesContacts() {
   useEffect(() => {
     const previousTitle = document.title
     const description =
-      "خدمات مختبر خلود المباشرة: حجز موعد، زيارة منزلية، واتساب، التوظيف، الاتصال وموقع المختبر."
+      "خدمات مختبر خلود في مكة المكرمة: حجز موعد، زيارة منزلية، واتساب، التوظيف، الاتصال وموقع المختبر."
     const metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]')
     const ogDescription = document.querySelector<HTMLMetaElement>('meta[property="og:description"]')

@@ -36,11 +36,11 @@ export function Footer() {
                   href="https://maps.app.goo.gl/gCdW24wQmYMrLJGv6"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="فتح موقع مختبر خلود على خرائط Google"
+                  aria-label="فتح موقع مختبر خلود في مكة المكرمة على خرائط Google"
                   className="flex items-start gap-3 text-muted-foreground transition-colors hover:text-primary"
                 >
                 <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <span className="text-sm font-medium">عرض موقع المختبر على خرائط Google</span>
+                  <span className="text-sm font-medium">مكة المكرمة — عرض الموقع على خرائط Google</span>
                 </a>
               </li>
               <li className="flex items-center gap-3">
