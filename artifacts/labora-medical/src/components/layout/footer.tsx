@@ -56,7 +56,13 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-muted-foreground font-en text-sm" dir="ltr">info@kholoudlab.sa</span>
+                <a
+                  href="mailto:info@kholoudlab.com"
+                  className="text-muted-foreground font-en text-sm transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  dir="ltr"
+                >
+                  info@kholoudlab.com
+                </a>
               </li>
             </ul>
           </div>
