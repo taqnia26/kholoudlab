@@ -32,16 +32,23 @@ export function Footer() {
             <h4 className="text-lg font-bold mb-6 text-foreground">معلومات التواصل</h4>
             <ul className="space-y-4">
               <li>
-                <a
-                  href="https://maps.app.goo.gl/gCdW24wQmYMrLJGv6"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="فتح موقع مختبر خلود في مكة المكرمة على خرائط Google"
-                  className="flex items-start gap-3 text-muted-foreground transition-colors hover:text-primary"
-                >
-                <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <span className="text-sm font-medium">مكة المكرمة — عرض الموقع على خرائط Google</span>
-                </a>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <div className="min-w-0 text-sm">
+                    <p className="text-muted-foreground font-medium leading-relaxed">
+                      مكة المكرمة - الزايدي - طريق الأمير نايف بن عبدالعزيز
+                    </p>
+                    <a
+                      href="https://maps.app.goo.gl/gCdW24wQmYMrLJGv6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="فتح موقع مختبر خلود في مكة المكرمة على خرائط Google"
+                      className="mt-1 inline-block text-primary font-medium transition-colors hover:text-primary/80 hover:underline"
+                    >
+                      عرض الموقع على الخريطة
+                    </a>
+                  </div>
+                </div>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary shrink-0" />
