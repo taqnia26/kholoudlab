@@ -4,7 +4,8 @@ import { FaWhatsapp } from "react-icons/fa6"
 
 const phoneNumber = "966559070400"
 const message = "مرحباً، أرغب بالاستفسار عن خدمات مختبر خلود"
-const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+const whatsappUrl =
+  "https://web.whatsapp.com/send/?phone=966559070400&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D8%A8%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1+%D8%B9%D9%86+%D8%AE%D8%AF%D9%85%D8%A7%D8%AA+%D9%85%D8%AE%D8%AA%D8%A8%D8%B1+%D8%AE%D9%84%D9%88%D8%AF&type=phone_number&app_absent=0"
 
 export default function WhatsApp() {
   useEffect(() => {
