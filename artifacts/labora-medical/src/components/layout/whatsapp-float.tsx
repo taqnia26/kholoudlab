@@ -7,7 +7,7 @@ const whatsappUrl =
 export function WhatsAppFloat() {
   const [location] = useLocation()
 
-  if (location === "/our-services-contacts") {
+  if (location === "/our-services-contacts" || location === "/whatsapp") {
     return null
   }
 

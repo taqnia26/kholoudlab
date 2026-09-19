@@ -8,6 +8,7 @@ import Home from '@/pages/home';
 import About from '@/pages/about';
 import StaffResults from '@/pages/staff-results';
 import OurServicesContacts from '@/pages/our-services-contacts';
+import WhatsApp from '@/pages/whatsapp';
 import { WhatsAppFloat } from '@/components/layout/whatsapp-float';
 import {
   Route,
@@ -26,6 +27,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/staff/results" component={StaffResults} />
           <Route path="/our-services-contacts" component={OurServicesContacts} />
+          <Route path="/whatsapp" component={WhatsApp} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
