@@ -4,6 +4,43 @@
 
 BEGIN;
 
+-- Results-portal tables (the production DB had no tables at all). Same shape as lib/db/src/schema.
+CREATE TABLE IF NOT EXISTS analysis_reports (
+  id                     serial PRIMARY KEY,
+  analysis_number        text NOT NULL UNIQUE,
+  patient_name           text NOT NULL,
+  date_of_birth          date NOT NULL,
+  phone_last4            text NOT NULL,
+  verification_code_hash text NOT NULL,
+  sample_date            date NOT NULL,
+  status                 text NOT NULL DEFAULT 'pending',
+  result_values          jsonb NOT NULL DEFAULT '[]'::jsonb,
+  approved_at            timestamptz,
+  approved_by            text,
+  created_at             timestamptz NOT NULL DEFAULT now(),
+  updated_at             timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS result_status_audit (
+  id              serial PRIMARY KEY,
+  report_id       integer NOT NULL REFERENCES analysis_reports(id),
+  staff_id        text NOT NULL,
+  previous_status text NOT NULL,
+  next_status     text NOT NULL,
+  created_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS result_verification_challenges (
+  id         serial PRIMARY KEY,
+  token_hash text NOT NULL UNIQUE,
+  report_id  integer REFERENCES analysis_reports(id),
+  expires_at timestamptz NOT NULL,
+  used_at    timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Dashboard tables
+
 CREATE TABLE IF NOT EXISTS bookings (
   id          serial PRIMARY KEY,
   name        text NOT NULL,

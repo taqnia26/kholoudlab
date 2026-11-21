@@ -95,7 +95,9 @@ router.get("/admin/stats", async (_req, res): Promise<void> => {
     db.execute(sql`select test_type as name, count(*)::int as count from bookings group by 1 order by 2 desc limit 8`),
     db.execute(sql`select status, count(*)::int as count from bookings group by 1`),
     db.execute(sql`select status, count(*)::int as count from job_applications group by 1`),
-    db.execute(sql`select status, count(*)::int as count from analysis_reports group by 1`),
+    db
+      .execute(sql`select status, count(*)::int as count from analysis_reports group by 1`)
+      .catch(() => ({ rows: [] as unknown[] })),
     db.execute(sql`
       select
         (select count(*) from bookings)::int as bookings_total,
