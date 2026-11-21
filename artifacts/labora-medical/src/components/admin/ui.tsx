@@ -207,3 +207,28 @@ export function timeAgo(value: string): string {
   if (days < 30) return `قبل ${days} يوم`
   return new Intl.DateTimeFormat("ar-SA-u-ca-gregory-nu-latn", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value))
 }
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+}
+
+/** Number that counts up from 0 once when it appears (instant when reduced motion is on). */
+export function CountUp({ value, duration = 900 }: { value: number; duration?: number }) {
+  const [shown, setShown] = useState(() => (prefersReducedMotion() ? value : 0))
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      setShown(value)
+      return
+    }
+    let frame = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration)
+      setShown(Math.round(value * (1 - Math.pow(1 - progress, 3))))
+      if (progress < 1) frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [value, duration])
+  return <>{shown.toLocaleString("en-US")}</>
+}

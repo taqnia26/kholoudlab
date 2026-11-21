@@ -266,7 +266,7 @@
   --adm-ink-3: #512047;
   --adm-ok: #0b7a63;
   --adm-warn: #b45309;
-  font-family: "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
+  font-family: "Cairo", "Tajawal", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
 }
@@ -277,10 +277,56 @@
 .adm .adm-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .adm .adm-scroll::-webkit-scrollbar-thumb { background: hsl(270 14% 78%); border-radius: 8px; }
 @keyframes adm-rise {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
-.adm .adm-rise { animation: adm-rise 0.35s ease-out both; }
+@keyframes adm-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(24px, -18px, 0) scale(1.12); }
+}
+@keyframes adm-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes adm-sheen {
+  from { transform: translateX(120%) skewX(-18deg); }
+  to { transform: translateX(-220%) skewX(-18deg); }
+}
+@keyframes adm-ping {
+  0% { box-shadow: 0 0 0 0 hsl(330 67% 38% / 0.55); }
+  100% { box-shadow: 0 0 0 10px hsl(330 67% 38% / 0); }
+}
+@keyframes adm-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.adm .adm-rise { animation: adm-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.adm .adm-stagger > * { animation: adm-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.adm .adm-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.adm .adm-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+.adm .adm-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.adm .adm-stagger > *:nth-child(4) { animation-delay: 0.23s; }
+.adm .adm-stagger > *:nth-child(5) { animation-delay: 0.30s; }
+.adm .adm-stagger > *:nth-child(6) { animation-delay: 0.37s; }
+.adm .adm-blob { position: absolute; border-radius: 9999px; filter: blur(48px); opacity: 0.55; animation: adm-float 11s ease-in-out infinite; pointer-events: none; }
+.adm .adm-mesh {
+  background: linear-gradient(120deg, #260a21, #5a1649, #8f1a50, #3a1233, #260a21);
+  background-size: 300% 300%;
+  animation: adm-drift 16s ease infinite;
+}
+.adm .adm-lift { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+.adm .adm-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -14px hsl(330 67% 28% / 0.35); border-color: hsl(330 40% 80%); }
+.adm .adm-sheen { position: relative; overflow: hidden; }
+.adm .adm-sheen::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  animation: adm-sheen 6s ease-in-out infinite; pointer-events: none;
+}
+.adm .adm-dot-ping { animation: adm-ping 1.6s ease-out infinite; }
+.adm .adm-bar { transform-origin: right; animation: adm-grow 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+/* RTL: Tailwind translates the checked thumb +1rem (rightwards); cancel that and move it 1rem left. */
+.adm [role="switch"][data-state="checked"] > span { transform: translateX(-2rem); }
 @media (prefers-reduced-motion: reduce) {
-  .adm .adm-rise { animation: none; }
+  .adm .adm-rise, .adm .adm-stagger > *, .adm .adm-blob, .adm .adm-mesh, .adm .adm-sheen::after, .adm .adm-dot-ping, .adm .adm-bar { animation: none !important; }
+  .adm .adm-lift { transition: none; }
 }

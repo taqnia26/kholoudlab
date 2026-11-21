@@ -1,5 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
+import { adminUsersTable, db } from "@workspace/db";
+import { verifyPassword } from "./password";
 
 // Same signing scheme as the staff results portal (see routes/results.ts) so one
 // admin login can also open /staff/results without a second login.
@@ -70,6 +73,30 @@ export function getAdminAccessCode(adminId: string): string | null {
   }
 }
 
+/** IDs of the accounts defined in LAB_ADMIN_ACCOUNTS (system owners, not editable from the dashboard). */
+export function getEnvAdminIds(): string[] {
+  const configured = process.env.LAB_ADMIN_ACCOUNTS;
+  if (!configured) return [];
+  try {
+    const accounts = JSON.parse(configured) as Record<string, unknown>;
+    return Object.keys(accounts).filter((id) => getAdminAccessCode(id) !== null);
+  } catch {
+    return [];
+  }
+}
+
+/** Checks env accounts first, then dashboard-managed accounts. Returns the canonical id on success. */
+export async function verifyAdminLogin(adminId: string, accessCode: string): Promise<string | null> {
+  const envCode = getAdminAccessCode(adminId);
+  if (envCode) return equalSecrets(envCode, accessCode) ? adminId : null;
+  const [row] = await db.select().from(adminUsersTable).where(eq(adminUsersTable.adminId, adminId)).limit(1);
+  // Always run a hash comparison so unknown ids and wrong passwords take similar time.
+  const ok = verifyPassword(accessCode, row?.passwordHash ?? "scrypt$AAAAAAAAAAAAAAAAAAAAAA$AAAA");
+  if (!row || !row.active || !ok) return null;
+  await db.update(adminUsersTable).set({ lastLoginAt: new Date() }).where(eq(adminUsersTable.id, row.id));
+  return row.adminId;
+}
+
 export function createAdminSession(adminId: string) {
   const expiresAt = Date.now() + ADMIN_TOKEN_TTL_MS;
   return {
@@ -80,11 +107,25 @@ export function createAdminSession(adminId: string) {
   };
 }
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+export async function requireAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
   const session = readToken(getBearerToken(req), "admin");
   if (!session) {
     res.status(401).json({ error: "Admin authentication is required" });
     return;
+  }
+  // Dashboard-managed accounts can be disabled or removed; that must cut off live sessions immediately.
+  if (getAdminAccessCode(session.staffId) === null) {
+    try {
+      const [row] = await db.select({ active: adminUsersTable.active }).from(adminUsersTable).where(eq(adminUsersTable.adminId, session.staffId)).limit(1);
+      if (!row?.active) {
+        res.status(401).json({ error: "Admin authentication is required" });
+        return;
+      }
+    } catch (err) {
+      req.log.error({ err }, "Admin account lookup failed");
+      res.status(503).json({ error: "تعذر التحقق من الحساب" });
+      return;
+    }
   }
   res.locals.adminId = session.staffId;
   next();

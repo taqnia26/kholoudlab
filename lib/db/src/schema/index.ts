@@ -26,3 +26,4 @@ export * from "./hero-slides";
 export * from "./site-settings";
 export * from "./gallery-items";
 export * from "./admin-audit";
+export * from "./admin-users";

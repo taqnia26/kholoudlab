@@ -8,6 +8,7 @@ import adminRouter from "./admin";
 import contentRouter from "./content";
 import galleryRouter from "./gallery";
 import adminContentRouter from "./admin-content";
+import adminUsersRouter from "./admin-users";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(contentRouter);
 router.use(galleryRouter);
 router.use(adminRouter);
 router.use(adminContentRouter);
+router.use(adminUsersRouter);
 
 export default router;

@@ -8,9 +8,8 @@ import {
 } from "@workspace/db";
 import {
   createAdminSession,
-  equalSecrets,
-  getAdminAccessCode,
   requireAdmin,
+  verifyAdminLogin,
 } from "../lib/admin-auth";
 import { logAudit } from "../lib/audit";
 
@@ -63,21 +62,21 @@ function hasImageSignature(buffer: Buffer, mimeType: string): boolean {
 }
 
 // --- session ---------------------------------------------------------------
-router.post("/admin/session", (req, res): void => {
+router.post("/admin/session", async (req, res): Promise<void> => {
   if (!canTryLogin(req)) {
     res.status(429).json({ error: "محاولات كثيرة، حاول بعد دقائق" });
     return;
   }
   const adminId = typeof req.body?.adminId === "string" ? req.body.adminId.trim() : "";
   const accessCode = typeof req.body?.accessCode === "string" ? req.body.accessCode : "";
-  const expected = adminId ? getAdminAccessCode(adminId) : null;
-  if (!expected || !equalSecrets(expected, accessCode)) {
+  const verifiedId = adminId && accessCode ? await verifyAdminLogin(adminId, accessCode).catch(() => null) : null;
+  if (!verifiedId) {
     req.log.warn("Rejected admin session request");
     res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
     return;
   }
   req.log.info({ adminId }, "Created admin session");
-  res.json({ ...createAdminSession(adminId), adminId });
+  res.json({ ...createAdminSession(verifiedId), adminId: verifiedId });
 });
 
 router.use("/admin", requireAdmin);

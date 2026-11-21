@@ -3,8 +3,16 @@ import { useQuery } from "@tanstack/react-query"
 import { useLocation } from "wouter"
 import {
   BarChart3, Briefcase, CalendarCheck, ExternalLink, FlaskConical, History, Home, Image as ImageIcon,
-  LayoutGrid, Loader2, LogOut, Menu, Phone, Search as SearchIcon, ShieldCheck, Presentation, type LucideIcon,
+  LayoutGrid, Loader2, UserCog, LogOut, Menu, Phone, Search as SearchIcon, ShieldCheck, Presentation, type LucideIcon,
 } from "lucide-react"
+import "@fontsource/cairo/arabic-400.css"
+import "@fontsource/cairo/arabic-600.css"
+import "@fontsource/cairo/arabic-700.css"
+import "@fontsource/cairo/arabic-800.css"
+import "@fontsource/cairo/latin-400.css"
+import "@fontsource/cairo/latin-600.css"
+import "@fontsource/cairo/latin-700.css"
+import "@fontsource/cairo/latin-800.css"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
@@ -19,8 +27,9 @@ import { HomeEditor } from "@/components/admin/home-editor"
 import { Settings } from "@/components/admin/settings"
 import { Seo } from "@/components/admin/seo"
 import { Activity } from "@/components/admin/activity"
+import { Users } from "@/components/admin/users"
 
-type TabId = "overview" | "bookings" | "applications" | "home" | "slides" | "gallery" | "settings" | "seo" | "activity"
+type TabId = "overview" | "bookings" | "applications" | "home" | "slides" | "gallery" | "settings" | "seo" | "activity" | "users"
 
 type NavItem = { id: TabId | "results"; label: string; icon: LucideIcon; badge?: "bookings" | "applications" }
 const NAV: Array<{ group: string; items: NavItem[] }> = [
@@ -43,27 +52,16 @@ const NAV: Array<{ group: string; items: NavItem[] }> = [
       { id: "seo", label: "محركات البحث", icon: SearchIcon },
     ],
   },
-  { group: "النظام", items: [{ id: "activity", label: "سجل النشاط", icon: History }] },
+  { group: "النظام", items: [{ id: "users", label: "المسؤولون", icon: UserCog }, { id: "activity", label: "سجل النشاط", icon: History }] },
 ]
 const TITLES: Record<TabId, string> = {
   overview: "نظرة عامة", bookings: "الحجوزات", applications: "طلبات التوظيف", home: "الصفحة الرئيسية", slides: "سلايدر العروض",
-  gallery: "المعرض والباقات", settings: "التواصل والإعدادات", seo: "محركات البحث", activity: "سجل النشاط",
+  gallery: "المعرض والباقات", settings: "التواصل والإعدادات", seo: "محركات البحث", activity: "سجل النشاط", users: "المسؤولون",
 }
 
 function readHash(): TabId {
   const value = window.location.hash.replace(/^#/, "") as TabId
   return value in TITLES ? value : "overview"
-}
-
-function useFont() {
-  useEffect(() => {
-    if (document.getElementById("adm-font")) return
-    const link = document.createElement("link")
-    link.id = "adm-font"
-    link.rel = "stylesheet"
-    link.href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
-    document.head.appendChild(link)
-  }, [])
 }
 
 function Login({ onDone }: { onDone: () => void }) {
@@ -92,13 +90,15 @@ function Login({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
-      <div className="flex flex-col justify-between bg-[color:var(--adm-ink)] p-8 text-white lg:p-12">
-        <img src="/assets/kholoud-lab-logo.png" alt="مختبر خلود" className="h-14 w-auto self-start rounded-lg bg-white p-2" />
-        <div className="my-10 max-w-md">
-          <h1 className="text-3xl font-bold leading-snug lg:text-4xl">كل ما يخص الموقع في مكان واحد</h1>
+      <div className="adm-mesh relative flex flex-col justify-between overflow-hidden p-8 text-white lg:p-12">
+        <span className="adm-blob -right-16 top-10 h-64 w-64 bg-[#d6427f]" aria-hidden="true" />
+        <span className="adm-blob bottom-0 left-0 h-72 w-72 bg-[#6d2bb5]" style={{ animationDelay: "-6s" }} aria-hidden="true" />
+        <img src="/assets/kholoud-lab-logo.png" alt="مختبر خلود" className="relative h-14 w-auto self-start rounded-lg bg-white p-2" />
+        <div className="relative my-10 max-w-md">
+          <h1 className="relative text-3xl font-extrabold leading-snug lg:text-4xl">كل ما يخص الموقع في مكان واحد</h1>
           <p className="mt-4 leading-relaxed text-white/70">تابع الحجوزات وطلبات التوظيف، وعدّل العروض والنصوص وبيانات التواصل بدون الحاجة لمبرمج.</p>
         </div>
-        <ul className="space-y-2 text-sm text-white/60">
+        <ul className="relative space-y-2 text-sm text-white/70">
           <li>الحجوزات الجديدة تظهر في قائمة اليوم فور وصولها</li>
           <li>كل تعديل يُسجَّل باسم من أجراه</li>
         </ul>
@@ -195,7 +195,6 @@ function Sidebar({ tab, onSelect, counts, adminId, onLogout }: {
 }
 
 export default function Admin() {
-  useFont()
   const [, navigate] = useLocation()
   const [authed, setAuthed] = useState(() => Boolean(getAdminToken()))
   const [tab, setTab] = useState<TabId>(readHash)
@@ -286,7 +285,7 @@ export default function Admin() {
           </div>
         </header>
         <main className="mx-auto w-full max-w-[1400px] flex-1 p-4 lg:p-8">
-          {tab === "overview" && <Overview onNavigate={(id) => select(id as TabId | "results")} />}
+          {tab === "overview" && <Overview adminName={adminId} onNavigate={(id) => select(id as TabId | "results")} />}
           {tab === "bookings" && <Bookings />}
           {tab === "applications" && <Applications />}
           {tab === "home" && <HomeEditor />}
@@ -295,6 +294,7 @@ export default function Admin() {
           {tab === "settings" && <Settings />}
           {tab === "seo" && <Seo />}
           {tab === "activity" && <Activity />}
+          {tab === "users" && <Users />}
         </main>
       </div>
     </div>
