@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { HeroDecor, HeroPulseLine } from "@/components/hero-decor"
+import { FaqDecor } from "@/components/faq-decor"
 import { useQuery } from "@tanstack/react-query"
 import { useCreateBooking } from "@workspace/api-client-react"
 import { SERVICE_ICONS, useGalleryImages, usePageSeo, useSiteContent } from "@/lib/site-content"
@@ -671,14 +672,15 @@ export default function Home() {
         </section>)}
 
         {/* FAQ */}
-        {sections.faq && (<section className="py-24 bg-primary/5">
-          <div className="container mx-auto px-4 md:px-6 max-w-3xl reveal-on-scroll">
+        {sections.faq && (<section className="relative overflow-hidden py-24 bg-primary/5">
+          <FaqDecor />
+          <div className="container relative z-10 mx-auto px-4 md:px-6 max-w-3xl reveal-on-scroll">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">الأسئلة الشائعة</h2>
               <p className="text-muted-foreground">كل ما تود معرفته عن زيارتك لمختبرنا وإجراء التحاليل.</p>
             </div>
 
-            <Accordion type="single" collapsible className="w-full bg-white rounded-2xl shadow-sm border border-border/50 p-4">
+            <Accordion type="single" collapsible className="faq-card w-full bg-white rounded-2xl border border-border/50 p-4">
               {content.faq.map((item, index) => (
                 <AccordionItem key={`${item.q}-${index}`} value={`item-${index + 1}`}>
                   <AccordionTrigger>{item.q}</AccordionTrigger>

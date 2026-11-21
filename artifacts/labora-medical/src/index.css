@@ -169,6 +169,33 @@
   transform: translateY(0);
 }
 
+@keyframes faq-glyph {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+  50% { transform: translate3d(8px, -26px, 0) rotate(8deg); }
+}
+@keyframes faq-rise {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-220px) scale(1.15); opacity: 0; }
+}
+@keyframes faq-grid-drift {
+  from { background-position: 0 0; }
+  to { background-position: 28px 28px; }
+}
+@keyframes faq-glow {
+  0%, 100% { box-shadow: 0 10px 40px -18px hsl(var(--primary) / 0.25); }
+  50% { box-shadow: 0 18px 60px -14px hsl(var(--primary) / 0.45); }
+}
+.faq-glyph { animation: faq-glyph 9s ease-in-out infinite; }
+.faq-bubble { animation: faq-rise 9s ease-in infinite; }
+.faq-grid {
+  background-image: radial-gradient(hsl(var(--primary) / 0.22) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+  animation: faq-grid-drift 6s linear infinite;
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 25%, #000 85%);
+  mask-image: radial-gradient(ellipse at center, transparent 25%, #000 85%);
+}
+.faq-card { animation: faq-glow 5s ease-in-out infinite; }
 @keyframes hero-float {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(-3deg); }
   50% { transform: translate3d(0, -18px, 0) rotate(4deg); }
@@ -204,7 +231,7 @@
   animation: hero-shimmer 7s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-float, .hero-orb, .hero-ring-spin, .hero-ring-spin-rev, .hero-dot, .hero-shimmer, .hero-ecg { animation: none; }
+  .hero-float, .hero-orb, .hero-ring-spin, .hero-ring-spin-rev, .hero-dot, .hero-shimmer, .hero-ecg, .faq-glyph, .faq-bubble, .faq-grid, .faq-card { animation: none; }
 }
 
 @keyframes hero-slider-glow {
