@@ -20,9 +20,9 @@ const offerImages = Array.from(
 )
 
 const nationalDayOfferImages = Array.from(
-  { length: 8 },
+  { length: 17 },
   (_, index) =>
-    `/assets/national-day-96/web/national-day-96-${String(index + 1).padStart(2, "0")}.webp`,
+    `/assets/white-friday/kholoud-white-friday-${String(index + 1).padStart(2, "0")}.webp`,
 )
 
 export default function Home() {
@@ -210,10 +210,10 @@ export default function Home() {
               {/* Hero Slider + Interactive Portal */}
               <div id="portal" className="w-full lg:w-1/2 max-w-xl mx-auto lg:mx-0 reveal-on-scroll" style={{ transitionDelay: '0.2s' }}>
                 <div
-                  className="hero-slider-frame relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-[#f4f2e8] shadow-2xl shadow-primary/15"
+                  className="hero-slider-frame relative aspect-[3/4] overflow-hidden rounded-[2rem] border border-white/70 bg-[#2a0620] shadow-2xl shadow-primary/15"
                   role="region"
                   aria-roledescription="سلايدر"
-                  aria-label="عروض اليوم الوطني السعودي 96"
+                  aria-label="عروض الجمعة البيضاء من مختبر خلود"
                   onMouseEnter={() => setIsHeroInteractionPaused(true)}
                   onMouseLeave={() => setIsHeroInteractionPaused(false)}
                   onFocus={() => setIsHeroInteractionPaused(true)}
@@ -229,7 +229,7 @@ export default function Home() {
                     href={nationalDayOfferImages[activeNationalDayOffer]}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`عرض اليوم الوطني رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
+                    aria-label={`عرض الجمعة البيضاء رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
                     className={`national-day-slide absolute inset-0 flex items-center justify-center p-1.5 opacity-100 sm:p-3 ${
                       nationalDaySlideDirection > 0
                         ? "national-day-slide-from-left"
@@ -238,21 +238,21 @@ export default function Home() {
                   >
                     <img
                       src={nationalDayOfferImages[activeNationalDayOffer]}
-                      alt={`عرض اليوم الوطني من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
-                      width="1080"
-                      height="1350"
+                      alt={`عرض الجمعة البيضاء من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
+                      width="720"
+                      height="1280"
                       fetchPriority={activeNationalDayOffer === 0 ? "high" : "auto"}
                       className="h-full w-full object-contain"
                     />
                   </a>
 
                   <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-3 sm:inset-x-5 sm:top-5">
-                    <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-2 backdrop-blur-sm" aria-label="التنقل بين عروض اليوم الوطني">
+                    <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-2 backdrop-blur-sm" aria-label="التنقل بين عروض الجمعة البيضاء">
                       {nationalDayOfferImages.map((image, index) => (
                         <button
                           key={`${image}-dot`}
                           type="button"
-                          aria-label={`عرض اليوم الوطني رقم ${index + 1}`}
+                          aria-label={`عرض الجمعة البيضاء رقم ${index + 1}`}
                           aria-current={activeNationalDayOffer === index ? "true" : undefined}
                           onClick={() => {
                             setNationalDaySlideDirection(index >= activeNationalDayOffer ? 1 : -1)
@@ -263,7 +263,7 @@ export default function Home() {
                       ))}
                     </div>
                     <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-primary shadow-sm">
-                      اليوم الوطني 96
+                      عروض الجمعة البيضاء
                     </span>
                   </div>
 
