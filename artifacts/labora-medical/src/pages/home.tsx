@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
+import { useQuery } from "@tanstack/react-query"
 import { useCreateBooking } from "@workspace/api-client-react"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
@@ -25,7 +26,23 @@ const nationalDayOfferImages = Array.from(
     `/assets/white-friday/kholoud-white-friday-${String(index + 1).padStart(2, "0")}.webp`,
 )
 
+type PublicSlide = { id: number; title: string; url: string }
+
 export default function Home() {
+  // Slides managed from /admin; falls back to the static posters when none exist or the API is unreachable.
+  const { data: managedSlides } = useQuery({
+    queryKey: ["public-slides"],
+    queryFn: async (): Promise<PublicSlide[]> => {
+      const response = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/slides`)
+      if (!response.ok) throw new Error("slides unavailable")
+      return response.json()
+    },
+    staleTime: 60_000,
+    retry: 1,
+  })
+  const heroImages =
+    managedSlides && managedSlides.length > 0 ? managedSlides.map((slide) => slide.url) : nationalDayOfferImages
+
   const [bookingForm, setBookingForm] = useState({
     name: "",
     phone: "",
@@ -62,6 +79,13 @@ export default function Home() {
     return () => observer.disconnect()
   }, [])
 
+  const heroSlideCount = heroImages.length
+
+  // Start from the first slide whenever the slide set changes (static -> managed).
+  useEffect(() => {
+    setActiveNationalDayOffer(0)
+  }, [heroSlideCount])
+
   useEffect(() => {
     if (
       isHeroAutoPlayPaused ||
@@ -71,24 +95,24 @@ export default function Home() {
 
     const timer = window.setInterval(() => {
       setNationalDaySlideDirection(1)
-      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
+      setActiveNationalDayOffer((current) => (current + 1) % heroImages.length)
     }, 5000)
 
     return () => window.clearInterval(timer)
-  }, [isHeroAutoPlayPaused, isHeroInteractionPaused])
+  }, [isHeroAutoPlayPaused, isHeroInteractionPaused, heroSlideCount])
 
   useEffect(() => {
     const adjacentOffers = [
-      (activeNationalDayOffer + 1) % nationalDayOfferImages.length,
-      (activeNationalDayOffer - 1 + nationalDayOfferImages.length) %
-        nationalDayOfferImages.length,
+      (activeNationalDayOffer + 1) % heroImages.length,
+      (activeNationalDayOffer - 1 + heroImages.length) %
+        heroImages.length,
     ]
 
     adjacentOffers.forEach((index) => {
       const image = new Image()
-      image.src = nationalDayOfferImages[index]
+      image.src = heroImages[index]
     })
-  }, [activeNationalDayOffer])
+  }, [activeNationalDayOffer, heroSlideCount])
 
   useEffect(() => {
     let delayedScroll: number | undefined
@@ -225,8 +249,8 @@ export default function Home() {
                 >
                   <div className="hero-slider-glow pointer-events-none absolute -inset-8 z-10 rounded-[2.5rem] border border-white/40" />
                   <a
-                    key={nationalDayOfferImages[activeNationalDayOffer]}
-                    href={nationalDayOfferImages[activeNationalDayOffer]}
+                    key={heroImages[activeNationalDayOffer]}
+                    href={heroImages[activeNationalDayOffer]}
                     target="_blank"
                     rel="noreferrer"
                     aria-label={`عرض الجمعة البيضاء رقم ${activeNationalDayOffer + 1} بالحجم الكامل`}
@@ -237,7 +261,7 @@ export default function Home() {
                     }`}
                   >
                     <img
-                      src={nationalDayOfferImages[activeNationalDayOffer]}
+                      src={heroImages[activeNationalDayOffer]}
                       alt={`عرض الجمعة البيضاء من مختبر خلود رقم ${activeNationalDayOffer + 1}`}
                       width="720"
                       height="1280"
@@ -248,7 +272,7 @@ export default function Home() {
 
                   <div className="absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-3 sm:inset-x-5 sm:top-5">
                     <div className="flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-2 backdrop-blur-sm" aria-label="التنقل بين عروض الجمعة البيضاء">
-                      {nationalDayOfferImages.map((image, index) => (
+                      {heroImages.map((image, index) => (
                         <button
                           key={`${image}-dot`}
                           type="button"
@@ -272,7 +296,7 @@ export default function Home() {
                     aria-label="العرض التالي"
                     onClick={() => {
                       setNationalDaySlideDirection(1)
-                      setActiveNationalDayOffer((current) => (current + 1) % nationalDayOfferImages.length)
+                      setActiveNationalDayOffer((current) => (current + 1) % heroImages.length)
                     }}
                     className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25 sm:left-5"
                   >
@@ -302,7 +326,7 @@ export default function Home() {
                     aria-label="العرض السابق"
                     onClick={() => {
                       setNationalDaySlideDirection(-1)
-                      setActiveNationalDayOffer((current) => (current - 1 + nationalDayOfferImages.length) % nationalDayOfferImages.length)
+                      setActiveNationalDayOffer((current) => (current - 1 + heroImages.length) % heroImages.length)
                     }}
                     className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-primary shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25 sm:right-5"
                   >
@@ -311,7 +335,7 @@ export default function Home() {
 
                   <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center sm:bottom-5">
                     <span className="rounded-full bg-black/45 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
-                      العرض {activeNationalDayOffer + 1} من {nationalDayOfferImages.length}
+                      العرض {activeNationalDayOffer + 1} من {heroImages.length}
                     </span>
                   </div>
                 </div>

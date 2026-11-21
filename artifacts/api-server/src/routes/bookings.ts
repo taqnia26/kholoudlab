@@ -1,9 +1,11 @@
 import { Router, type IRouter } from "express";
+import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import {
   CreateBookingBody,
   CreateBookingResponse,
 } from "@workspace/api-zod";
+import { bookingsTable, db } from "@workspace/db";
 
 const router: IRouter = Router();
 const bookingAttempts = new Map<string, { count: number; resetAt: number }>();
@@ -94,6 +96,22 @@ router.post("/bookings", async (req, res): Promise<void> => {
 
   const emailSubjectName = name.replace(/[\r\n]+/g, " ").trim();
 
+  // Keep a record in the database; a DB failure must never block the email flow.
+  let bookingId: number | null = null;
+  try {
+    const [saved] = await db
+      .insert(bookingsTable)
+      .values({ name: name.trim(), phone: phone.trim(), testType: testType.trim() })
+      .returning({ id: bookingsTable.id });
+    bookingId = saved?.id ?? null;
+  } catch (dbError) {
+    req.log.error({ err: dbError }, "Failed to save booking to database");
+  }
+  const savedMessage = {
+    success: true,
+    message: "تم استلام طلبك بنجاح، وسيتواصل معك فريقنا قريبًا.",
+  };
+
   try {
     if (!resend) {
       throw new Error("RESEND_API_KEY is not configured.");
@@ -136,6 +154,10 @@ router.post("/bookings", async (req, res): Promise<void> => {
         { resendError },
         "Resend rejected booking email",
       );
+      if (bookingId !== null) {
+        res.json(CreateBookingResponse.parse(savedMessage));
+        return;
+      }
       res
         .status(502)
         .json({ error: "تعذر إرسال الطلب الآن. يرجى المحاولة مرة أخرى." });
@@ -143,6 +165,13 @@ router.post("/bookings", async (req, res): Promise<void> => {
     }
 
     req.log.info("Booking request email sent");
+    if (bookingId !== null) {
+      await db
+        .update(bookingsTable)
+        .set({ emailSent: 1 })
+        .where(eq(bookingsTable.id, bookingId))
+        .catch((err) => req.log.error({ err }, "Failed to flag booking email"));
+    }
     res.json(
       CreateBookingResponse.parse({
         success: true,
@@ -151,6 +180,10 @@ router.post("/bookings", async (req, res): Promise<void> => {
     );
   } catch (error) {
     req.log.error({ err: error }, "Failed to send booking request email");
+    if (bookingId !== null) {
+      res.json(CreateBookingResponse.parse(savedMessage));
+      return;
+    }
     res
       .status(502)
       .json({ error: "تعذر إرسال الطلب الآن. يرجى المحاولة مرة أخرى." });

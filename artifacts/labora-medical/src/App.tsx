@@ -7,6 +7,7 @@ import NotFound from '@/pages/not-found';
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import StaffResults from '@/pages/staff-results';
+import Admin from '@/pages/admin';
 import OurServicesContacts from '@/pages/our-services-contacts';
 import WhatsApp from '@/pages/whatsapp';
 import { WhatsAppFloat } from '@/components/layout/whatsapp-float';
@@ -26,6 +27,7 @@ function Router() {
         <Route path="/" component={Home} />
           <Route path="/about" component={About} />
           <Route path="/staff/results" component={StaffResults} />
+          <Route path="/admin" component={Admin} />
           <Route path="/our-services-contacts" component={OurServicesContacts} />
           <Route path="/whatsapp" component={WhatsApp} />
         <Route component={NotFound} />

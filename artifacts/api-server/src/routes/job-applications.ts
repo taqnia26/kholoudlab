@@ -4,6 +4,7 @@ import {
   CreateJobApplicationBody,
   CreateJobApplicationResponse,
 } from "@workspace/api-zod";
+import { db, jobApplicationsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -125,6 +126,30 @@ router.post("/job-applications", async (req, res): Promise<void> => {
     .slice(0, 160);
   const subjectName = name.replace(/[\r\n]+/g, " ").trim();
 
+  // Keep a record (with the CV) in the database; a DB failure must not block the email flow.
+  let saved = false;
+  try {
+    await db.insert(jobApplicationsTable).values({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      position: position?.trim() ?? "",
+      coverLetter: coverLetter?.trim() ?? "",
+      fileName: safeFileName,
+      fileType,
+      fileSize: attachment.byteLength,
+      fileData: attachment,
+    });
+    saved = true;
+  } catch (dbError) {
+    req.log.error({ err: dbError }, "Failed to save job application to database");
+  }
+  const savedMessage = {
+    success: true,
+    message:
+      "تم استلام طلبك بنجاح، وسيقوم فريق التوظيف بمراجعته. سنتواصل معك عند توافق مؤهلاتك مع إحدى الفرص المتاحة.",
+  };
+
   try {
     if (!resend) {
       throw new Error("RESEND_API_KEY is not configured.");
@@ -168,6 +193,10 @@ router.post("/job-applications", async (req, res): Promise<void> => {
 
     if (error) {
       req.log.error({ resendError: error }, "Resend rejected job application");
+      if (saved) {
+        res.json(CreateJobApplicationResponse.parse(savedMessage));
+        return;
+      }
       res
         .status(502)
         .json({ error: "تعذر إرسال الطلب الآن. يرجى المحاولة مرة أخرى." });
@@ -184,6 +213,10 @@ router.post("/job-applications", async (req, res): Promise<void> => {
     );
   } catch (error) {
     req.log.error({ err: error }, "Failed to send job application email");
+    if (saved) {
+      res.json(CreateJobApplicationResponse.parse(savedMessage));
+      return;
+    }
     res
       .status(502)
       .json({ error: "تعذر إرسال الطلب الآن. يرجى المحاولة مرة أخرى." });
