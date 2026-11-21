@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
+import { HeroDecor, HeroPulseLine } from "@/components/hero-decor"
 import { useQuery } from "@tanstack/react-query"
 import { useCreateBooking } from "@workspace/api-client-react"
 import { SERVICE_ICONS, useGalleryImages, usePageSeo, useSiteContent } from "@/lib/site-content"
@@ -211,23 +212,24 @@ export default function Home() {
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] z-0 mix-blend-multiply" />
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-16">
               
               {/* Hero Content */}
-              <div className="w-full lg:w-1/2 text-center lg:text-right reveal-on-scroll">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6 border border-primary/20">
+              <div className="relative w-full lg:w-1/2 text-center lg:text-right reveal-on-scroll lg:pt-10">
+                <HeroDecor />
+                <div className="relative z-10 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6 border border-primary/20">
                   <ShieldCheck className="h-4 w-4" />
                   <span>{hero.badge}</span>
                 </div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.2] mb-6">
+                <h1 className="relative z-10 text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.2] mb-6">
                   {hero.headline1}<br />
-                  <span className="text-primary">{hero.headlineAccent}</span> {hero.headline2}
+                  <span className="hero-shimmer">{hero.headlineAccent}</span> {hero.headline2}
                 </h1>
-                <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <p className="relative z-10 text-lg text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                   {hero.subtitle}
                 </p>
                 
-                <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                   <Button size="lg" className="w-full sm:w-auto gap-2 rounded-full" onClick={() => {
                     document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
                   }}>
@@ -235,12 +237,13 @@ export default function Home() {
                     {hero.ctaLabel}
                   </Button>
                 </div>
+                <HeroPulseLine />
               </div>
 
               {/* Hero Slider + Interactive Portal */}
               <div id="portal" className="w-full lg:w-1/2 max-w-xl mx-auto lg:mx-0 reveal-on-scroll" style={{ transitionDelay: '0.2s' }}>
                 <div
-                  className="hero-slider-frame relative aspect-[3/4] overflow-hidden rounded-[2rem] border border-white/70 bg-[#2a0620] shadow-2xl shadow-primary/15"
+                  className="hero-slider-frame relative aspect-[3/4] lg:aspect-auto lg:h-[min(78vh,46rem)] overflow-hidden rounded-[2rem] border border-white/70 bg-[#2a0620] shadow-2xl shadow-primary/15"
                   role="region"
                   aria-roledescription="سلايدر"
                   aria-label="عروض الجمعة البيضاء من مختبر خلود"
