@@ -241,3 +241,46 @@
   direction: ltr;
   display: inline-block;
 }
+
+/* ---------------------------------------------------------------
+   Admin dashboard theme (scoped; the public site is untouched).
+   Aubergine ink from the offer posters, one magenta accent, paper-lavender surface.
+   --------------------------------------------------------------- */
+.adm {
+  --background: 270 24% 96%;
+  --foreground: 280 30% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 280 30% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 280 30% 11%;
+  --border: 270 18% 89%;
+  --input: 270 16% 84%;
+  --muted: 270 22% 94%;
+  --muted-foreground: 280 9% 40%;
+  --accent: 330 40% 95%;
+  --accent-foreground: 330 67% 32%;
+  --primary: 330 67% 38%;
+  --radius: 0.5rem;
+  --adm-ink: #260a21;
+  --adm-ink-2: #3a1233;
+  --adm-ink-3: #512047;
+  --adm-ok: #0b7a63;
+  --adm-warn: #b45309;
+  font-family: "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.adm *:focus-visible {
+  outline: 2px solid hsl(330 67% 38%);
+  outline-offset: 2px;
+}
+.adm .adm-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.adm .adm-scroll::-webkit-scrollbar-thumb { background: hsl(270 14% 78%); border-radius: 8px; }
+@keyframes adm-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.adm .adm-rise { animation: adm-rise 0.35s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .adm .adm-rise { animation: none; }
+}

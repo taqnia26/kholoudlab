@@ -1,12 +1,14 @@
-import { Fragment, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { FileDown, Mail, Phone, Search } from "lucide-react"
+import { Briefcase, FileDown, Mail, MessageCircle, Phone, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { adminDownload, adminFetch, formatDate } from "@/lib/admin-api"
+import { adminDownload, adminFetch, formatDate, whatsappLink } from "@/lib/admin-api"
+import { EmptyState, Loading, PageHeader, Panel, Segmented, StatusPill, timeAgo } from "./ui"
 import { APPLICATION_STATUS_LABELS } from "./labels"
 
 type Application = {
@@ -21,6 +23,10 @@ type Application = {
   status: string
   notes: string
   createdAt: string
+}
+
+function formatSize(bytes: number): string {
+  return bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`
 }
 
 export function Applications() {
@@ -38,10 +44,7 @@ export function Applications() {
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number; status?: string; notes?: string }) =>
       adminFetch<Application>(`/admin/job-applications/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "applications"] })
-      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] })
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
     onError: (err: Error) => toast({ title: "تعذر الحفظ", description: err.message, variant: "destructive" }),
   })
 
@@ -54,6 +57,8 @@ export function Applications() {
     )
   }, [data, search, status])
 
+  const open = data.find((a) => a.id === openId) ?? null
+
   const download = async (a: Application) => {
     try {
       await adminDownload(`/admin/job-applications/${a.id}/file`, a.fileName)
@@ -63,111 +68,145 @@ export function Applications() {
   }
 
   return (
-    <Card>
-      <CardContent className="space-y-4 p-4 sm:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث بالاسم أو البريد أو الوظيفة" className="pr-9" />
-          </div>
-          <select
+    <div className="adm-rise">
+      <PageHeader title="طلبات التوظيف" subtitle="الطلبات المرسلة من صفحة الوظائف مع السيرة الذاتية. غيّر الحالة وأضف ملاحظات التقييم." />
+      <Panel flush>
+        <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
+          <Segmented
+            label="تصفية بالحالة"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-            aria-label="تصفية بالحالة"
-          >
-            <option value="all">كل الحالات</option>
-            {Object.entries(APPLICATION_STATUS_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
+            onChange={setStatus}
+            options={[
+              { value: "all", label: "الكل", count: data.length },
+              ...Object.entries(APPLICATION_STATUS_LABELS).map(([value, label]) => ({ value, label, count: data.filter((a) => a.status === value).length })),
+            ]}
+          />
+          <div className="relative lg:w-72">
+            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث بالاسم أو الوظيفة" className="h-9 pr-9" aria-label="بحث في الطلبات" />
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="py-12 text-center text-muted-foreground">جاري التحميل...</div>
+          <Loading rows={5} />
         ) : error ? (
-          <div className="py-12 text-center text-destructive">تعذر تحميل الطلبات</div>
+          <div className="py-14 text-center text-destructive">تعذر تحميل الطلبات</div>
         ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground">
-            {data.length === 0 ? "لا توجد طلبات توظيف محفوظة بعد. الطلبات الجديدة ستظهر هنا مع السيرة الذاتية." : "لا توجد نتائج مطابقة"}
-          </div>
+          <EmptyState
+            icon={Briefcase}
+            title={data.length === 0 ? "لا توجد طلبات توظيف محفوظة بعد" : "لا توجد نتائج مطابقة"}
+            text={data.length === 0 ? "الطلبات الجديدة تُحفظ هنا مع السيرة الذاتية، وتصلك أيضاً على الإيميل." : "غيّر الفلتر أو كلمة البحث."}
+          />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="adm-scroll overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>التاريخ</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="w-36">وصل</TableHead>
                   <TableHead>المتقدم</TableHead>
-                  <TableHead>التواصل</TableHead>
                   <TableHead>الوظيفة</TableHead>
-                  <TableHead>السيرة</TableHead>
                   <TableHead>الحالة</TableHead>
-                  <TableHead>ملاحظات</TableHead>
+                  <TableHead className="w-28">السيرة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((a) => (
-                  <Fragment key={a.id}>
-                    <TableRow>
-                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{formatDate(a.createdAt)}</TableCell>
-                      <TableCell>
-                        <button className="text-right font-semibold hover:text-primary" onClick={() => setOpenId(openId === a.id ? null : a.id)}>
-                          {a.name}
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2" dir="ltr">
-                          <span className="text-xs">{a.phone}</span>
-                          <a href={`tel:${a.phone}`} aria-label="اتصال" className="text-primary"><Phone className="h-4 w-4" /></a>
-                          <a href={`mailto:${a.email}`} aria-label="بريد" className="text-primary"><Mail className="h-4 w-4" /></a>
-                        </div>
-                      </TableCell>
-                      <TableCell>{a.position || "طلب توظيف عام"}</TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="outline" className="gap-1" onClick={() => download(a)}>
-                          <FileDown className="h-4 w-4" />
-                          تحميل
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <select
-                          value={a.status}
-                          onChange={(e) => update.mutate({ id: a.id, status: e.target.value })}
-                          className="h-8 rounded-full border px-2 text-xs font-bold"
-                          aria-label="حالة الطلب"
-                        >
-                          {Object.entries(APPLICATION_STATUS_LABELS).map(([key, label]) => (
-                            <option key={key} value={key}>{label}</option>
-                          ))}
-                        </select>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          defaultValue={a.notes}
-                          maxLength={2000}
-                          placeholder="أضف ملاحظة"
-                          className="h-8 min-w-40 text-xs"
-                          onBlur={(e) => {
-                            if (e.target.value !== a.notes) update.mutate({ id: a.id, notes: e.target.value })
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                    {openId === a.id && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="bg-muted/40 text-sm">
-                          <div className="mb-1 text-xs text-muted-foreground">{a.email}</div>
-                          <div className="whitespace-pre-wrap">{a.coverLetter || "لا توجد رسالة إضافية."}</div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </Fragment>
+                  <TableRow key={a.id} className="cursor-pointer" onClick={() => setOpenId(a.id)}>
+                    <TableCell className="text-xs text-muted-foreground">
+                      <div className="font-semibold text-foreground">{timeAgo(a.createdAt)}</div>
+                      {formatDate(a.createdAt, false)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-bold">{a.name}</div>
+                      <div className="text-xs text-muted-foreground" dir="ltr" style={{ textAlign: "right" }}>{a.email}</div>
+                    </TableCell>
+                    <TableCell>{a.position || "طلب توظيف عام"}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={a.status}
+                        onChange={(e) => update.mutate({ id: a.id, status: e.target.value })}
+                        aria-label={`حالة طلب ${a.name}`}
+                        className="h-8 rounded-md border border-input bg-background px-2 text-[13px] font-semibold"
+                      >
+                        {Object.entries(APPLICATION_STATUS_LABELS).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
+                      </select>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Button size="sm" variant="outline" className="gap-1.5" onClick={() => download(a)}>
+                        <FileDown className="h-4 w-4" />
+                        تحميل
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </Panel>
+
+      <Sheet open={open !== null} onOpenChange={(value) => !value && setOpenId(null)}>
+        <SheetContent side="left" className="adm w-full overflow-y-auto sm:max-w-lg" dir="rtl">
+          {open && (
+            <>
+              <SheetHeader className="text-right">
+                <SheetTitle className="text-xl">{open.name}</SheetTitle>
+                <SheetDescription>{open.position || "طلب توظيف عام"} · {formatDate(open.createdAt)}</SheetDescription>
+              </SheetHeader>
+              <div className="mt-5 space-y-5">
+                <StatusPill status={open.status} label={APPLICATION_STATUS_LABELS[open.status] ?? open.status} />
+                <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 rounded-lg bg-muted/60 p-4 text-sm">
+                  <dt className="text-muted-foreground">الجوال</dt>
+                  <dd className="font-semibold" dir="ltr" style={{ textAlign: "right" }}>{open.phone}</dd>
+                  <dt className="text-muted-foreground">البريد</dt>
+                  <dd className="font-semibold break-all" dir="ltr" style={{ textAlign: "right" }}>{open.email}</dd>
+                  <dt className="text-muted-foreground">الملف</dt>
+                  <dd className="font-semibold">{open.fileName} ({formatSize(open.fileSize)})</dd>
+                </dl>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button asChild variant="outline" className="gap-1.5"><a href={`tel:${open.phone}`}><Phone className="h-4 w-4" />اتصال</a></Button>
+                  <Button asChild variant="outline" className="gap-1.5"><a href={`mailto:${open.email}`}><Mail className="h-4 w-4" />بريد</a></Button>
+                  <Button asChild className="gap-1.5 bg-[#25D366] text-white hover:bg-[#25D366]/90">
+                    <a href={whatsappLink(open.phone, `مرحباً ${open.name}، معك مختبر خلود بخصوص طلب التوظيف.`)} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />واتساب</a>
+                  </Button>
+                </div>
+                <Button className="w-full gap-2" onClick={() => download(open)}>
+                  <FileDown className="h-4 w-4" />
+                  تحميل السيرة الذاتية
+                </Button>
+                <div className="space-y-2">
+                  <div className="text-[13px] font-semibold">رسالة المتقدم</div>
+                  <p className="whitespace-pre-wrap rounded-lg border border-border p-3 text-sm leading-relaxed">{open.coverLetter || "لا توجد رسالة إضافية."}</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-[13px] font-semibold">تغيير الحالة</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(APPLICATION_STATUS_LABELS).map(([key, label]) => (
+                      <Button key={key} size="sm" variant={open.status === key ? "default" : "outline"} onClick={() => update.mutate({ id: open.id, status: key })} disabled={update.isPending}>
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <Notes key={open.id} initial={open.notes} saving={update.isPending} onSave={(notes) => update.mutate({ id: open.id, notes })} />
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+    </div>
+  )
+}
+
+function Notes({ initial, onSave, saving }: { initial: string; onSave: (value: string) => void; saving: boolean }) {
+  const [value, setValue] = useState(initial)
+  return (
+    <div className="space-y-2">
+      <label className="text-[13px] font-semibold" htmlFor="application-notes">ملاحظات التقييم</label>
+      <Textarea id="application-notes" value={value} onChange={(e) => setValue(e.target.value)} maxLength={2000} rows={4} placeholder="انطباع المقابلة، الراتب المتوقع، موعد المتابعة" />
+      <Button size="sm" onClick={() => onSave(value)} disabled={saving || value === initial}>حفظ الملاحظة</Button>
+    </div>
   )
 }

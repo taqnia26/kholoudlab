@@ -1,24 +1,70 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useLocation } from "wouter"
-import { BarChart3, CalendarCheck, FlaskConical, Image as ImageIcon, Briefcase, LogOut, Shield, LoaderCircle } from "lucide-react"
+import {
+  BarChart3, Briefcase, CalendarCheck, ExternalLink, FlaskConical, History, Home, Image as ImageIcon,
+  LayoutGrid, Loader2, LogOut, Menu, Phone, Search as SearchIcon, ShieldCheck, Presentation, type LucideIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { adminFetch, clearAdminSession, getAdminToken, setAdminSession } from "@/lib/admin-api"
+import { cn } from "@/lib/utils"
 import { Overview } from "@/components/admin/overview"
 import { Bookings } from "@/components/admin/bookings"
 import { Applications } from "@/components/admin/applications"
 import { Slides } from "@/components/admin/slides"
+import { Gallery } from "@/components/admin/gallery"
+import { HomeEditor } from "@/components/admin/home-editor"
+import { Settings } from "@/components/admin/settings"
+import { Seo } from "@/components/admin/seo"
+import { Activity } from "@/components/admin/activity"
 
-type Tab = "overview" | "bookings" | "applications" | "slides"
+type TabId = "overview" | "bookings" | "applications" | "home" | "slides" | "gallery" | "settings" | "seo" | "activity"
 
-const TABS: Array<{ id: Tab | "results"; label: string; icon: typeof BarChart3 }> = [
-  { id: "overview", label: "نظرة عامة", icon: BarChart3 },
-  { id: "bookings", label: "الحجوزات", icon: CalendarCheck },
-  { id: "applications", label: "طلبات التوظيف", icon: Briefcase },
-  { id: "slides", label: "سلايدر العروض", icon: ImageIcon },
-  { id: "results", label: "نتائج التحاليل", icon: FlaskConical },
+type NavItem = { id: TabId | "results"; label: string; icon: LucideIcon; badge?: "bookings" | "applications" }
+const NAV: Array<{ group: string; items: NavItem[] }> = [
+  { group: "", items: [{ id: "overview", label: "نظرة عامة", icon: BarChart3 }] },
+  {
+    group: "الطلبات",
+    items: [
+      { id: "bookings", label: "الحجوزات", icon: CalendarCheck, badge: "bookings" },
+      { id: "applications", label: "طلبات التوظيف", icon: Briefcase, badge: "applications" },
+      { id: "results", label: "نتائج التحاليل", icon: FlaskConical },
+    ],
+  },
+  {
+    group: "محتوى الموقع",
+    items: [
+      { id: "home", label: "الصفحة الرئيسية", icon: Home },
+      { id: "slides", label: "سلايدر العروض", icon: Presentation },
+      { id: "gallery", label: "المعرض والباقات", icon: ImageIcon },
+      { id: "settings", label: "التواصل والإعدادات", icon: Phone },
+      { id: "seo", label: "محركات البحث", icon: SearchIcon },
+    ],
+  },
+  { group: "النظام", items: [{ id: "activity", label: "سجل النشاط", icon: History }] },
 ]
+const TITLES: Record<TabId, string> = {
+  overview: "نظرة عامة", bookings: "الحجوزات", applications: "طلبات التوظيف", home: "الصفحة الرئيسية", slides: "سلايدر العروض",
+  gallery: "المعرض والباقات", settings: "التواصل والإعدادات", seo: "محركات البحث", activity: "سجل النشاط",
+}
+
+function readHash(): TabId {
+  const value = window.location.hash.replace(/^#/, "") as TabId
+  return value in TITLES ? value : "overview"
+}
+
+function useFont() {
+  useEffect(() => {
+    if (document.getElementById("adm-font")) return
+    const link = document.createElement("link")
+    link.id = "adm-font"
+    link.rel = "stylesheet"
+    link.href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
+    document.head.appendChild(link)
+  }, [])
+}
 
 function Login({ onDone }: { onDone: () => void }) {
   const [adminId, setAdminId] = useState("")
@@ -26,7 +72,7 @@ function Login({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const submit = async (event: React.FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault()
     setLoading(true)
     setError("")
@@ -45,34 +91,115 @@ function Login({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-4">
-      <Card className="w-full max-w-sm border-primary/10 shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Shield className="h-7 w-7" />
+    <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
+      <div className="flex flex-col justify-between bg-[color:var(--adm-ink)] p-8 text-white lg:p-12">
+        <img src="/assets/kholoud-lab-logo.png" alt="مختبر خلود" className="h-14 w-auto self-start rounded-lg bg-white p-2" />
+        <div className="my-10 max-w-md">
+          <h1 className="text-3xl font-bold leading-snug lg:text-4xl">كل ما يخص الموقع في مكان واحد</h1>
+          <p className="mt-4 leading-relaxed text-white/70">تابع الحجوزات وطلبات التوظيف، وعدّل العروض والنصوص وبيانات التواصل بدون الحاجة لمبرمج.</p>
+        </div>
+        <ul className="space-y-2 text-sm text-white/60">
+          <li>الحجوزات الجديدة تظهر في قائمة اليوم فور وصولها</li>
+          <li>كل تعديل يُسجَّل باسم من أجراه</li>
+        </ul>
+      </div>
+      <div className="flex items-center justify-center bg-background p-6">
+        <form onSubmit={submit} className="w-full max-w-sm space-y-5">
+          <div>
+            <h2 className="text-2xl font-bold">تسجيل الدخول</h2>
+            <p className="mt-1 text-sm text-muted-foreground">للمسؤولين فقط</p>
           </div>
-          <CardTitle>لوحة تحكم مختبر خلود</CardTitle>
-          <CardDescription>سجّل الدخول للمتابعة</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-4">
-            <Input value={adminId} onChange={(e) => setAdminId(e.target.value)} placeholder="معرّف المسؤول" autoComplete="username" required />
-            <Input type="password" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} placeholder="رمز الدخول" autoComplete="current-password" required />
-            {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : "دخول"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <label className="block space-y-1.5">
+            <span className="text-[13px] font-semibold">معرّف المسؤول</span>
+            <Input value={adminId} onChange={(e) => setAdminId(e.target.value)} autoComplete="username" required className="h-11" />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-[13px] font-semibold">رمز الدخول</span>
+            <Input type="password" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} autoComplete="current-password" required className="h-11" />
+          </label>
+          {error && <p className="rounded-md bg-[#fbe4ee] px-3 py-2 text-sm font-semibold text-[#8f1a50]" role="alert">{error}</p>}
+          <Button type="submit" className="h-11 w-full" disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "دخول"}
+          </Button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function Sidebar({ tab, onSelect, counts, adminId, onLogout }: {
+  tab: TabId
+  onSelect: (id: TabId | "results") => void
+  counts: { bookings: number; applications: number }
+  adminId: string
+  onLogout: () => void
+}) {
+  return (
+    <div className="flex h-full flex-col bg-[color:var(--adm-ink)] text-white">
+      <div className="flex items-center gap-3 px-5 py-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary"><LayoutGrid className="h-5 w-5" /></div>
+        <div className="leading-tight">
+          <div className="font-bold">مختبر خلود</div>
+          <div className="text-xs text-white/55">لوحة التحكم</div>
+        </div>
+      </div>
+      <nav aria-label="أقسام اللوحة" className="adm-scroll flex-1 overflow-y-auto px-3 pb-4">
+        {NAV.map((section) => (
+          <div key={section.group || "top"} className="mb-4">
+            {section.group && <div className="mb-1.5 px-3 text-xs font-semibold text-white/45">{section.group}</div>}
+            <ul className="space-y-0.5">
+              {section.items.map(({ id, label, icon: Icon, badge }) => {
+                const active = tab === id
+                const count = badge ? counts[badge] : 0
+                return (
+                  <li key={id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(id)}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-semibold transition-colors",
+                        active ? "bg-[color:var(--adm-ink-3)] text-white" : "text-white/70 hover:bg-[color:var(--adm-ink-2)] hover:text-white",
+                      )}
+                    >
+                      {active && <span className="absolute inset-y-2 right-0 w-1 rounded-l bg-primary" aria-hidden="true" />}
+                      <Icon className="h-[18px] w-[18px] shrink-0" />
+                      <span className="flex-1 text-right">{label}</span>
+                      {count > 0 && <span className="min-w-5 rounded-full bg-primary px-1.5 text-center text-xs font-bold leading-5">{count}</span>}
+                      {id === "results" && <ExternalLink className="h-3.5 w-3.5 opacity-50" />}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+      <div className="space-y-1 border-t border-white/10 p-3">
+        <a href="/" target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-semibold text-white/70 hover:bg-[color:var(--adm-ink-2)] hover:text-white">
+          <ExternalLink className="h-[18px] w-[18px]" />
+          عرض الموقع
+        </a>
+        <div className="flex items-center justify-between rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-sm font-bold" aria-hidden="true">{adminId.charAt(0).toUpperCase()}</div>
+            <div className="text-sm font-semibold">{adminId}</div>
+          </div>
+          <button type="button" onClick={onLogout} aria-label="تسجيل خروج" className="flex h-8 w-8 items-center justify-center rounded-md text-white/70 hover:bg-white/10 hover:text-white">
+            <LogOut className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
 
 export default function Admin() {
+  useFont()
   const [, navigate] = useLocation()
   const [authed, setAuthed] = useState(() => Boolean(getAdminToken()))
-  const [tab, setTab] = useState<Tab>("overview")
+  const [tab, setTab] = useState<TabId>(readHash)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     document.title = "لوحة التحكم | مختبر خلود"
@@ -80,17 +207,33 @@ export default function Admin() {
     robots.setAttribute("name", "robots")
     robots.setAttribute("content", "noindex, nofollow")
     const onLogout = () => setAuthed(false)
+    const onHash = () => setTab(readHash())
     window.addEventListener("kholoud-admin-logout", onLogout)
+    window.addEventListener("hashchange", onHash)
     return () => {
       window.removeEventListener("kholoud-admin-logout", onLogout)
+      window.removeEventListener("hashchange", onHash)
       document.title = "مختبر خلود للتحاليل الطبية | فحوصات وحجز موعد"
       robots.setAttribute("content", "index, follow")
     }
   }, [])
 
-  const goTo = (id: string) => {
-    if (id === "results") navigate("/staff/results")
-    else setTab(id as Tab)
+  const { data: stats } = useQuery({
+    queryKey: ["admin", "stats"],
+    queryFn: () => adminFetch<{ totals: { bookings_new: number; applications_new: number } }>("/admin/stats"),
+    enabled: authed,
+    refetchInterval: 45_000,
+  })
+
+  const select = (id: TabId | "results") => {
+    setMenuOpen(false)
+    if (id === "results") {
+      navigate("/staff/results")
+      return
+    }
+    window.location.hash = id
+    setTab(id)
+    window.scrollTo({ top: 0 })
   }
 
   const logout = () => {
@@ -98,48 +241,62 @@ export default function Admin() {
     setAuthed(false)
   }
 
-  return (
-    <div className="flex min-h-screen flex-col bg-muted/30 font-sans" dir="rtl">
-      <header className="relative z-10 flex items-center justify-between bg-primary px-4 py-3 text-primary-foreground shadow-md sm:px-6">
-        <div className="flex items-center gap-3">
-          <Shield className="h-6 w-6" />
-          <h1 className="text-lg font-bold sm:text-xl">لوحة تحكم مختبر خلود</h1>
-        </div>
-        {authed && (
-          <Button variant="secondary" size="sm" onClick={logout} className="gap-2 rounded-xl font-bold">
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">تسجيل خروج</span>
-          </Button>
-        )}
-      </header>
+  const adminId = (() => {
+    try {
+      const token = getAdminToken()
+      return token ? (JSON.parse(atob(token.split(".")[0].replace(/-/g, "+").replace(/_/g, "/"))).staffId as string) : "admin"
+    } catch {
+      return "admin"
+    }
+  })()
 
-      {!authed ? (
+  if (!authed) {
+    return (
+      <div className="adm min-h-screen" dir="rtl">
         <Login onDone={() => setAuthed(true)} />
-      ) : (
-        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
-          <nav aria-label="أقسام اللوحة" className="flex gap-2 overflow-x-auto lg:w-56 lg:shrink-0 lg:flex-col">
-            {TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => goTo(id)}
-                aria-current={tab === id ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
-                  tab === id ? "bg-primary text-primary-foreground shadow" : "bg-card text-foreground hover:bg-primary/10"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                {label}
-              </button>
-            ))}
-          </nav>
-          <main className="min-w-0 flex-1">
-            {tab === "overview" && <Overview onNavigate={goTo} />}
-            {tab === "bookings" && <Bookings />}
-            {tab === "applications" && <Applications />}
-            {tab === "slides" && <Slides />}
-          </main>
-        </div>
-      )}
+      </div>
+    )
+  }
+
+  const counts = { bookings: stats?.totals.bookings_new ?? 0, applications: stats?.totals.applications_new ?? 0 }
+
+  return (
+    <div className="adm flex min-h-screen bg-background text-foreground" dir="rtl">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 lg:block">
+        <Sidebar tab={tab} onSelect={select} counts={counts} adminId={adminId} onLogout={logout} />
+      </aside>
+
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="right" className="adm w-72 border-0 p-0" dir="rtl">
+          <SheetTitle className="sr-only">قائمة اللوحة</SheetTitle>
+          <Sidebar tab={tab} onSelect={select} counts={counts} adminId={adminId} onLogout={logout} />
+        </SheetContent>
+      </Sheet>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur lg:px-8">
+          <Button variant="outline" size="icon" className="h-9 w-9 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="فتح القائمة">
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-[color:var(--adm-ok)]" />
+            <span className="hidden sm:inline">لوحة التحكم</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="font-bold text-foreground">{TITLES[tab]}</span>
+          </div>
+        </header>
+        <main className="mx-auto w-full max-w-[1400px] flex-1 p-4 lg:p-8">
+          {tab === "overview" && <Overview onNavigate={(id) => select(id as TabId | "results")} />}
+          {tab === "bookings" && <Bookings />}
+          {tab === "applications" && <Applications />}
+          {tab === "home" && <HomeEditor />}
+          {tab === "slides" && <Slides />}
+          {tab === "gallery" && <Gallery />}
+          {tab === "settings" && <Settings />}
+          {tab === "seo" && <Seo />}
+          {tab === "activity" && <Activity />}
+        </main>
+      </div>
     </div>
   )
 }

@@ -23,3 +23,6 @@ export * from "./result-verification-challenges";
 export * from "./bookings";
 export * from "./job-applications";
 export * from "./hero-slides";
+export * from "./site-settings";
+export * from "./gallery-items";
+export * from "./admin-audit";

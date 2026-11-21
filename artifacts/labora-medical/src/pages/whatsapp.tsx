@@ -1,13 +1,11 @@
 import { useEffect } from "react"
 import { ExternalLink } from "lucide-react"
 import { FaWhatsapp } from "react-icons/fa6"
-
-const phoneNumber = "966559070400"
-const message = "مرحباً، أرغب بالاستفسار عن خدمات مختبر خلود"
-const whatsappUrl =
-  "https://web.whatsapp.com/send/?phone=966559070400&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D8%A8%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1+%D8%B9%D9%86+%D8%AE%D8%AF%D9%85%D8%A7%D8%AA+%D9%85%D8%AE%D8%AA%D8%A8%D8%B1+%D8%AE%D9%84%D9%88%D8%AF&type=phone_number&app_absent=0"
+import { useSiteContent } from "@/lib/site-content"
 
 export default function WhatsApp() {
+  const { contact } = useSiteContent()
+  const whatsappUrl = `https://web.whatsapp.com/send/?phone=${contact.whatsapp}&text=${encodeURIComponent(contact.whatsappMessage)}&type=phone_number&app_absent=0`
   useEffect(() => {
     const previousTitle = document.title
     const metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
@@ -49,7 +47,7 @@ export default function WhatsApp() {
         </div>
 
         <div className="mb-6 w-full rounded-2xl bg-[#f4f4f4] px-5 py-5 text-base font-medium text-[#555] shadow-sm sm:text-lg">
-          {message}
+          {contact.whatsappMessage}
         </div>
 
         <a
@@ -65,7 +63,7 @@ export default function WhatsApp() {
 
         <p className="mt-5 text-sm text-muted-foreground">
           سيتم فتح واتساب على الرقم
-          <span className="font-en mx-1 font-semibold text-foreground" dir="ltr">+966 55 907 0400</span>
+          <span className="font-en mx-1 font-semibold text-foreground" dir="ltr">{contact.phoneDisplay}</span>
         </p>
       </section>
     </main>

@@ -9,6 +9,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { useQuery } from "@tanstack/react-query"
 import { useCreateBooking } from "@workspace/api-client-react"
+import { SERVICE_ICONS, useGalleryImages, usePageSeo, useSiteContent } from "@/lib/site-content"
 import { 
   Activity, Microscope, FileText, HeartPulse, 
   Syringe, ShieldCheck, Clock, ChevronLeft, ChevronRight, ChevronUp, ChevronDown,
@@ -29,6 +30,11 @@ const nationalDayOfferImages = Array.from(
 type PublicSlide = { id: number; title: string; url: string }
 
 export default function Home() {
+  const content = useSiteContent()
+  const { hero, sections, contact } = content
+  usePageSeo("home", "مختبر خلود للتحاليل الطبية | فحوصات وحجز موعد")
+  const managedPackages = useGalleryImages("package")
+  const managedGallery = useGalleryImages("gallery")
   // Slides managed from /admin; falls back to the static posters when none exist or the API is unreachable.
   const { data: managedSlides } = useQuery({
     queryKey: ["public-slides"],
@@ -172,7 +178,7 @@ export default function Home() {
     }
   }
 
-  const visibleOffers = offerImages.slice(0, 8)
+  const visibleOffers = managedGallery ? managedGallery.map((item) => item.url) : offerImages.slice(0, 8)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -211,14 +217,14 @@ export default function Home() {
               <div className="w-full lg:w-1/2 text-center lg:text-right reveal-on-scroll">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6 border border-primary/20">
                   <ShieldCheck className="h-4 w-4" />
-                  <span>مختبر معتمد من سباهي (CBAHI)</span>
+                  <span>{hero.badge}</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.2] mb-6">
-                  دقتنا لراحتكم.<br />
-                  <span className="text-primary">رعاية مخبرية</span> تثقون بها.
+                  {hero.headline1}<br />
+                  <span className="text-primary">{hero.headlineAccent}</span> {hero.headline2}
                 </h1>
                 <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  في مختبر خلود للتحاليل الطبية، نجمع بين أحدث التقنيات العالمية والخبرات الطبية المتخصصة لنقدم لكم نتائج دقيقة وسريعة تعتمدون عليها لقراراتكم الصحية.
+                  {hero.subtitle}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
@@ -226,7 +232,7 @@ export default function Home() {
                     document.getElementById('portal')?.scrollIntoView({ behavior: 'smooth' })
                   }}>
                     <CalendarCheck className="h-5 w-5" />
-                    احجز موعدك الآن
+                    {hero.ctaLabel}
                   </Button>
                 </div>
               </div>
@@ -453,7 +459,7 @@ export default function Home() {
         </section>
 
         {/* SERVICES SECTION */}
-        <section id="services" className="py-20 bg-white">
+        {sections.services && (<section id="services" className="py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-2xl mx-auto mb-16 reveal-on-scroll">
               <p className="text-sm font-bold text-primary tracking-wider uppercase mb-3">تخصصاتنا المخبرية</p>
@@ -462,17 +468,12 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { icon: HeartPulse, title: "تحاليل الدم الروتينية", desc: "فحوصات أساسية شاملة للدم، السكر، والكوليسترول للاطمئنان على الصحة العامة." },
-                { icon: Activity, title: "تحاليل الهرمونات", desc: "قياس دقيق لمستويات الهرمونات الوظيفية للغدد، الخصوبة، والنمو." },
-                { icon: FileText, title: "البيولوجيا الجزيئية (PCR)", desc: "تشخيص متقدم للفيروسات والبكتيريا والأمراض الجينية بدقة متناهية." },
-                { icon: Syringe, title: "الفحوصات المناعية", desc: "تقييم كفاءة الجهاز المناعي واختبارات الحساسية والأمراض المناعية الذاتية." },
-                { icon: ShieldCheck, title: "الفحوصات الكيميائية الحيوية", desc: "فحص وظائف الكبد، الكلى، والإنزيمات الحيوية في الجسم." },
-                { icon: Clock, title: "خدمة السحب المنزلي", desc: "فريق طبي متخصص لزيارتك في المنزل أو العمل لراحتك ووقتك." },
-              ].map((service, i) => (
+              {content.services.filter((service) => service.visible).map((service, i) => {
+                const ServiceIcon = (SERVICE_ICONS[service.icon] ?? SERVICE_ICONS.heartPulse).Icon
+                return (
                 <div key={i} className="group p-8 rounded-2xl bg-background border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 reveal-on-scroll" style={{ transitionDelay: `${i * 0.1}s` }}>
                   <div className="h-14 w-14 rounded-xl bg-primary/5 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-                    <service.icon className="h-7 w-7" />
+                    <ServiceIcon className="h-7 w-7" />
                   </div>
                   <h4 className="text-xl font-bold text-foreground mb-3">{service.title}</h4>
                   <p className="text-muted-foreground leading-relaxed text-sm mb-6">{service.desc}</p>
@@ -481,13 +482,14 @@ export default function Home() {
                     <ChevronLeft className="h-4 w-4" />
                   </a>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
-        </section>
+        </section>)}
 
         {/* PACKAGES SECTION */}
-        <section id="packages" className="py-24 bg-primary/5 relative overflow-hidden">
+        {sections.packages && (<section id="packages" className="py-24 bg-primary/5 relative overflow-hidden">
           <div className="absolute -left-40 top-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 reveal-on-scroll">
@@ -503,7 +505,9 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
+              {(managedPackages
+                ? managedPackages.map((item) => ({ image: item.url, alt: item.title || "عرض من مختبر خلود", label: item.title || "عروض مختبر خلود", note: item.caption }))
+                : [
                 {
                   image: "/assets/kholoud-packages-1.png",
                   alt: "عروض باقة الفحص الشامل بلس والباقة الفضية وباقة الفحص الشامل من مختبر خلود",
@@ -514,7 +518,8 @@ export default function Home() {
                   alt: "عروض باقة تساقط الشعر والغدة الدرقية والمعادن والفيتامينات من مختبر خلود",
                   label: "عروض الفحوصات التخصصية",
                 },
-              ].map((offer, i) => (
+              ].map((item) => ({ ...item, note: "" }))
+              ).map((offer, i) => (
                 <Card
                   key={offer.image}
                   className="overflow-hidden border-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 reveal-on-scroll"
@@ -528,7 +533,7 @@ export default function Home() {
                   <CardContent className="flex flex-col items-stretch gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-bold text-foreground">{offer.label}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">العروض والأسعار موضحة في الصورة</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{offer.note || "العروض والأسعار موضحة في الصورة"}</p>
                     </div>
                     <Button
                       className="w-full shrink-0 rounded-full sm:w-auto"
@@ -544,10 +549,10 @@ export default function Home() {
               عرض كافة الباقات
             </Button>
           </div>
-        </section>
+        </section>)}
 
         {/* OFFER GALLERY */}
-        <section id="gallery" className="py-24 bg-white">
+        {sections.gallery && (<section id="gallery" className="py-24 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-start justify-between gap-6 mb-12 md:flex-row md:items-end reveal-on-scroll">
               <div className="max-w-2xl">
@@ -591,10 +596,10 @@ export default function Home() {
             </div>
 
           </div>
-        </section>
+        </section>)}
 
         {/* WHY CHOOSE US */}
-        <section id="about" className="py-24 bg-white">
+        {sections.about && (<section id="about" className="py-24 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col lg:flex-row items-center gap-16">
               <div className="w-full lg:w-1/2 reveal-on-scroll">
@@ -660,10 +665,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </section>)}
 
         {/* FAQ */}
-        <section className="py-24 bg-primary/5">
+        {sections.faq && (<section className="py-24 bg-primary/5">
           <div className="container mx-auto px-4 md:px-6 max-w-3xl reveal-on-scroll">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">الأسئلة الشائعة</h2>
@@ -671,53 +676,35 @@ export default function Home() {
             </div>
 
             <Accordion type="single" collapsible className="w-full bg-white rounded-2xl shadow-sm border border-border/50 p-4">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>هل أحتاج إلى الصيام قبل إجراء التحاليل؟</AccordionTrigger>
-                <AccordionContent>
-                  تختلف المتطلبات حسب نوع التحليل. فحوصات السكر والدهون الثلاثية تتطلب عادة الصيام لمدة 8-12 ساعة. يُنصح بالاستفسار عن تحاليلك المحددة عند حجز الموعد.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>كيف يمكنني استلام نتائج تحاليلي؟</AccordionTrigger>
-                <AccordionContent>
-                  يمكن استلام النتائج عبر رسالة واتساب بعد اعتمادها، أو مطبوعة بزيارة فرع المختبر. للاستفسار تواصل معنا على الرقم الموضح في الموقع.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>هل يتوفر لديكم خدمة السحب المنزلي؟</AccordionTrigger>
-                <AccordionContent>
-                  نعم، نوفر خدمة السحب المنزلي بواسطة ممرضين متخصصين. يمكنك حجز الخدمة عبر الموقع أو بالاتصال على رقمنا الموحد، وسيصلك الفريق في الوقت المحدد.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>متى تظهر نتائج التحاليل عادةً؟</AccordionTrigger>
-                <AccordionContent>
-                  معظم التحاليل الروتينية (مثل صورة الدم والسكر) تظهر نتائجها في نفس اليوم خلال ساعات قليلة. بعض التحاليل التخصصية الدقيقة أو الزراعة قد تستغرق من 3 إلى 5 أيام.
-                </AccordionContent>
-              </AccordionItem>
+              {content.faq.map((item, index) => (
+                <AccordionItem key={`${item.q}-${index}`} value={`item-${index + 1}`}>
+                  <AccordionTrigger>{item.q}</AccordionTrigger>
+                  <AccordionContent>{item.a}</AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
           </div>
-        </section>
+        </section>)}
 
         {/* CTA */}
-        <section className="py-20 relative overflow-hidden bg-primary">
+        {sections.cta && (<section className="py-20 relative overflow-hidden bg-primary">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-overlay" />
           <div className="container mx-auto px-4 md:px-6 relative z-10 text-center reveal-on-scroll">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">صحتك هي أولويتنا</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{content.cta.title}</h2>
             <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
-              لا تؤجل الاطمئنان على صحتك. احجز موعدك اليوم بخطوات بسيطة ودع فريقنا الطبي يعتني بك.
-            </p>
+              {content.cta.text}
+              </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 w-full sm:w-auto rounded-full font-bold px-8" asChild>
-                <a href={homeAnchor("book")}>احجز موعدك الآن</a>
+                <a href={homeAnchor("book")}>{content.cta.buttonLabel}</a>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 w-full sm:w-auto rounded-full gap-2">
                 <PhoneCall className="h-5 w-5" />
-                <span className="font-en" dir="ltr">055 907 0400</span>
+                <span className="font-en" dir="ltr">{contact.phoneDisplay}</span>
               </Button>
             </div>
           </div>
-        </section>
+        </section>)}
 
       </main>
 

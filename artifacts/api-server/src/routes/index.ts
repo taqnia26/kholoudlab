@@ -5,6 +5,9 @@ import jobApplicationsRouter from "./job-applications";
 import resultsRouter from "./results";
 import slidesRouter from "./slides";
 import adminRouter from "./admin";
+import contentRouter from "./content";
+import galleryRouter from "./gallery";
+import adminContentRouter from "./admin-content";
 
 const router: IRouter = Router();
 
@@ -13,6 +16,9 @@ router.use(bookingsRouter);
 router.use(jobApplicationsRouter);
 router.use(resultsRouter);
 router.use(slidesRouter);
+router.use(contentRouter);
+router.use(galleryRouter);
 router.use(adminRouter);
+router.use(adminContentRouter);
 
 export default router;

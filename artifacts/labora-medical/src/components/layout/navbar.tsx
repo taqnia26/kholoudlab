@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button"
 import { Phone, Menu, X } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { cn, homeAnchor } from "@/lib/utils"
+import { useSiteContent } from "@/lib/site-content"
+import { AnnouncementBar } from "@/components/layout/announcement-bar"
 
 export function Navbar() {
+  const { contact } = useSiteContent()
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
@@ -84,11 +87,12 @@ export function Navbar() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300 border-b border-transparent",
         isScrolled || mobileMenuOpen
-          ? "bg-background/95 backdrop-blur-md shadow-sm border-border/50 py-3"
-          : "bg-transparent py-5"
+          ? "bg-background/95 backdrop-blur-md shadow-sm border-border/50"
+          : "bg-transparent"
       )}
     >
-      <div className="container mx-auto px-4 md:px-6">
+      <AnnouncementBar />
+      <div className={cn("container mx-auto px-4 md:px-6 transition-all duration-300", isScrolled || mobileMenuOpen ? "py-3" : "py-5")}>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 z-50">
@@ -124,8 +128,8 @@ export function Navbar() {
 
           {/* Actions */}
           <div className="hidden lg:flex items-center gap-4">
-            <a href="tel:+966559070400" className="flex items-center gap-2 text-primary font-medium hover:opacity-80 transition-opacity">
-              <span className="font-en text-sm mt-1" dir="ltr">055 907 0400</span>
+            <a href={`tel:${contact.phoneTel}`} className="flex items-center gap-2 text-primary font-medium hover:opacity-80 transition-opacity">
+              <span className="font-en text-sm mt-1" dir="ltr">{contact.phoneDisplay}</span>
               <Phone className="h-4 w-4" />
             </a>
             <Button asChild className="rounded-full px-6">
@@ -199,9 +203,9 @@ export function Navbar() {
           )}
         </nav>
         <div className="mt-4 grid gap-3 border-t border-border/60 pt-4">
-          <a href="tel:+966559070400" className="flex items-center justify-center gap-2 rounded-xl bg-primary/5 p-3 font-medium text-primary">
+          <a href={`tel:${contact.phoneTel}`} className="flex items-center justify-center gap-2 rounded-xl bg-primary/5 p-3 font-medium text-primary">
             <Phone className="h-5 w-5" />
-            <span className="font-en text-lg" dir="ltr">055 907 0400</span>
+            <span className="font-en text-lg" dir="ltr">{contact.phoneDisplay}</span>
           </a>
           <Button className="w-full rounded-xl" asChild onClick={() => setMobileMenuOpen(false)}>
             <a href={homeAnchor("book")}>احجز موعدك الآن</a>

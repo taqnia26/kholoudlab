@@ -4,9 +4,7 @@ import { BriefcaseBusiness, CalendarCheck, Globe, House, MapPin, PhoneCall } fro
 import { FaInstagram, FaSnapchat, FaTiktok, FaWhatsapp } from "react-icons/fa6"
 import { JobApplicationDialog } from "@/components/job-application-dialog"
 import { cn, homeAnchor } from "@/lib/utils"
-
-const whatsappUrl = (message: string) =>
-  `https://wa.me/966559070400?text=${encodeURIComponent(message)}`
+import { useSiteContent, whatsappUrl as buildWhatsappUrl, type Contact } from "@/lib/site-content"
 
 type Brand = "primary" | "whatsapp" | "instagram" | "snapchat" | "tiktok"
 
@@ -20,7 +18,9 @@ type ActionItem = {
   disabled?: boolean
 }
 
-const actions: ActionItem[] = [
+const buildActions = (contact: Contact): ActionItem[] => {
+  const whatsappUrl = (message: string) => buildWhatsappUrl(contact, message)
+  return [
   {
     id: "whatsapp-lab",
     label: "واتساب المختبر",
@@ -34,7 +34,7 @@ const actions: ActionItem[] = [
     label: "واتساب الإدارة",
     icon: FaWhatsapp,
     brand: "whatsapp",
-    href: "https://wa.me/966556087747",
+    href: `https://wa.me/${contact.whatsappSecondary}`,
     newTab: true,
   },
   {
@@ -63,7 +63,7 @@ const actions: ActionItem[] = [
     label: "الموقع بمكة",
     icon: MapPin,
     brand: "primary",
-    href: "https://maps.app.goo.gl/gCdW24wQmYMrLJGv6",
+    href: contact.mapsUrl,
     newTab: true,
   },
   {
@@ -71,14 +71,14 @@ const actions: ActionItem[] = [
     label: "اتصل بنا",
     icon: PhoneCall,
     brand: "primary",
-    href: "tel:+966559070400",
+    href: `tel:${contact.phoneTel}`,
   },
   {
     id: "instagram",
     label: "إنستغرام",
     icon: FaInstagram,
     brand: "instagram",
-    href: "https://www.instagram.com/kholod_lab?stkn=ZGRtdmttd2Z0bG1t&utm_source=qr",
+    href: contact.instagram,
     newTab: true,
   },
   {
@@ -86,7 +86,7 @@ const actions: ActionItem[] = [
     label: "سناب شات",
     icon: FaSnapchat,
     brand: "snapchat",
-    href: "https://snapchat.com/t/O3phncNw",
+    href: contact.snapchat,
     newTab: true,
   },
   {
@@ -94,7 +94,7 @@ const actions: ActionItem[] = [
     label: "تيك توك",
     icon: FaTiktok,
     brand: "tiktok",
-    href: "https://www.tiktok.com/@kholod_lab?_r=1&_t=ZS-9A6x6U3yrmE",
+    href: contact.tiktok,
     newTab: true,
   },
   {
@@ -104,7 +104,8 @@ const actions: ActionItem[] = [
     brand: "primary",
     href: "/",
   },
-]
+  ]
+}
 
 const iconClasses: Record<Brand, string> = {
   primary: "bg-primary text-primary-foreground",
@@ -115,6 +116,8 @@ const iconClasses: Record<Brand, string> = {
 }
 
 export default function OurServicesContacts() {
+  const { contact } = useSiteContent()
+  const actions = buildActions(contact)
   useEffect(() => {
     const previousTitle = document.title
     const description =

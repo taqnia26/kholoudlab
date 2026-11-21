@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Footer } from "@/components/layout/footer"
 import { Navbar } from "@/components/layout/navbar"
 import { homeAnchor } from "@/lib/utils"
+import { usePageSeo } from "@/lib/site-content"
 import {
   Activity,
   ArrowRight,
@@ -57,6 +58,7 @@ export default function About() {
       document.title = "مختبر خلود للتحاليل الطبية | فحوصات وحجز موعد"
     }
   }, [])
+  usePageSeo("about", "من نحن | مختبر خلود للتحاليل الطبية")
 
   return (
     <div className="min-h-screen flex flex-col">

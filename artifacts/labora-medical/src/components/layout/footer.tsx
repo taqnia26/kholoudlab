@@ -1,8 +1,10 @@
 import { Link } from "wouter"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 import { homeAnchor } from "@/lib/utils"
+import { useSiteContent } from "@/lib/site-content"
 
 export function Footer() {
+  const { contact } = useSiteContent()
   return (
     <footer className="bg-primary/5 pt-20 pb-10 border-t border-primary/10">
       <div className="container mx-auto px-4 md:px-6">
@@ -36,10 +38,10 @@ export function Footer() {
                   <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div className="min-w-0 text-sm">
                     <p className="text-muted-foreground font-medium leading-relaxed">
-                      مكة المكرمة - الزايدي - طريق الأمير نايف بن عبدالعزيز
+                      {contact.address}
                     </p>
                     <a
-                      href="https://maps.app.goo.gl/gCdW24wQmYMrLJGv6"
+                      href={contact.mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="فتح موقع مختبر خلود في مكة المكرمة على خرائط Google"
@@ -52,16 +54,16 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-muted-foreground font-en text-sm" dir="ltr">055 907 0400</span>
+                <span className="text-muted-foreground font-en text-sm" dir="ltr">{contact.phoneDisplay}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary shrink-0" />
                 <a
-                  href="mailto:info@kholoudlab.com"
+                  href={`mailto:${contact.email}`}
                   className="text-muted-foreground font-en text-sm transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   dir="ltr"
                 >
-                  info@kholoudlab.com
+                  {contact.email}
                 </a>
               </li>
             </ul>
@@ -70,20 +72,15 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-bold mb-6 text-foreground">ساعات العمل</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <div className="text-muted-foreground text-sm">
-                  <p className="font-medium text-foreground mb-1">السبت - الخميس</p>
-                  <p>8:00 صباحاً - 10:00 مساءً</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-muted/0 mt-0.5 shrink-0" />
-                <div className="text-muted-foreground text-sm">
-                  <p className="font-medium text-foreground mb-1">الجمعة</p>
-                  <p>4:00 عصراً - 10:00 مساءً</p>
-                </div>
-              </li>
+              {contact.hours.map((row, index) => (
+                <li key={`${row.label}-${index}`} className="flex items-start gap-3">
+                  <Clock className={index === 0 ? "h-5 w-5 text-primary mt-0.5 shrink-0" : "h-5 w-5 text-transparent mt-0.5 shrink-0"} aria-hidden="true" />
+                  <div className="text-muted-foreground text-sm">
+                    <p className="font-medium text-foreground mb-1">{row.label}</p>
+                    <p>{row.value}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 

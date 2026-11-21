@@ -1,19 +1,18 @@
 import { FaWhatsapp } from "react-icons/fa6"
 import { useLocation } from "wouter"
-
-const whatsappUrl =
-  "https://wa.me/966559070400?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%20%D9%85%D8%AE%D8%AA%D8%A8%D8%B1%20%D8%AE%D9%84%D9%88%D8%AF"
+import { useSiteContent, whatsappUrl } from "@/lib/site-content"
 
 export function WhatsAppFloat() {
   const [location] = useLocation()
+  const { contact } = useSiteContent()
 
-  if (location === "/our-services-contacts" || location === "/whatsapp") {
+  if (location === "/our-services-contacts" || location === "/whatsapp" || location.startsWith("/admin") || location.startsWith("/staff")) {
     return null
   }
 
   return (
     <a
-      href={whatsappUrl}
+      href={whatsappUrl(contact, "مرحباً، أرغب بالاستفسار عن خدمات مختبر خلود")}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="تواصل مع مختبر خلود عبر واتساب"

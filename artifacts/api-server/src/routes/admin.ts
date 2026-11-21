@@ -12,6 +12,7 @@ import {
   getAdminAccessCode,
   requireAdmin,
 } from "../lib/admin-auth";
+import { logAudit } from "../lib/audit";
 
 const router: IRouter = Router();
 
@@ -83,7 +84,7 @@ router.use("/admin", requireAdmin);
 
 // --- stats -----------------------------------------------------------------
 router.get("/admin/stats", async (_req, res): Promise<void> => {
-  const [perDay, topTests, bookingStatus, applicationStatus, resultStatus, totals] = await Promise.all([
+  const [perDay, topTests, bookingStatus, applicationStatus, resultStatus, totals, recentBookings, recentApplications] = await Promise.all([
     db.execute(sql`
       select to_char(d::date, 'YYYY-MM-DD') as day, coalesce(c.count, 0)::int as count
       from generate_series((now() at time zone 'Asia/Riyadh')::date - 29, (now() at time zone 'Asia/Riyadh')::date, interval '1 day') d
@@ -102,9 +103,24 @@ router.get("/admin/stats", async (_req, res): Promise<void> => {
       select
         (select count(*) from bookings)::int as bookings_total,
         (select count(*) from bookings where created_at >= now() - interval '7 days')::int as bookings_7d,
+        (select count(*) from bookings where created_at >= now() - interval '14 days' and created_at < now() - interval '7 days')::int as bookings_prev_7d,
+        (select count(*) from bookings where status = 'new')::int as bookings_new,
+        (select count(*) from job_applications where status = 'new')::int as applications_new,
         (select count(*) from bookings where created_at >= date_trunc('day', now() at time zone 'Asia/Riyadh') at time zone 'Asia/Riyadh')::int as bookings_today,
         (select count(*) from job_applications)::int as applications_total,
         (select count(*) from hero_slides where active)::int as slides_active`),
+    db.select().from(bookingsTable).orderBy(desc(bookingsTable.createdAt)).limit(30),
+    db
+      .select({
+        id: jobApplicationsTable.id,
+        name: jobApplicationsTable.name,
+        position: jobApplicationsTable.position,
+        status: jobApplicationsTable.status,
+        createdAt: jobApplicationsTable.createdAt,
+      })
+      .from(jobApplicationsTable)
+      .orderBy(desc(jobApplicationsTable.createdAt))
+      .limit(5),
   ]);
 
   res.json({
@@ -114,6 +130,8 @@ router.get("/admin/stats", async (_req, res): Promise<void> => {
     bookingStatus: bookingStatus.rows,
     applicationStatus: applicationStatus.rows,
     resultStatus: resultStatus.rows,
+    recentBookings,
+    recentApplications,
   });
 });
 
@@ -151,6 +169,7 @@ router.patch("/admin/bookings/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Not found" });
     return;
   }
+  await logAudit(req, res, "update", "booking", id, update.status ? `حجز ${row.name}: الحالة ← ${update.status}` : `حجز ${row.name}: تعديل الملاحظات`);
   res.json(row);
 });
 
@@ -210,6 +229,7 @@ router.patch("/admin/job-applications/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Not found" });
     return;
   }
+  await logAudit(req, res, "update", "application", id, update.status ? `طلب ${row.name}: الحالة ← ${update.status}` : `طلب ${row.name}: تعديل الملاحظات`);
   res.json(row);
 });
 
@@ -304,6 +324,7 @@ router.post("/admin/slides", async (req, res): Promise<void> => {
       endsAt: endsAt ?? null,
     })
     .returning(slideColumns);
+  await logAudit(req, res, "create", "slide", row.id, "إضافة عرض للسلايدر");
   res.status(201).json(withUrl(row));
 });
 
@@ -318,6 +339,7 @@ router.post("/admin/slides/reorder", async (req, res): Promise<void> => {
       await tx.update(heroSlidesTable).set({ sortOrder: index + 1 }).where(eq(heroSlidesTable.id, id));
     }
   });
+  await logAudit(req, res, "reorder", "slide", "", "إعادة ترتيب السلايدر");
   res.json({ success: true });
 });
 
@@ -358,6 +380,7 @@ router.patch("/admin/slides/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Not found" });
     return;
   }
+  await logAudit(req, res, "update", "slide", id, update.active !== undefined ? (update.active ? "إظهار عرض في السلايدر" : "إخفاء عرض من السلايدر") : "تعديل عرض في السلايدر");
   res.json(withUrl(row));
 });
 
@@ -369,8 +392,8 @@ router.delete("/admin/slides/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Not found" });
     return;
   }
+  await logAudit(req, res, "delete", "slide", id, "حذف عرض من السلايدر");
   res.json({ success: true });
 });
-
 
 export default router;
